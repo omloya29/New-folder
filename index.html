@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQUAPRO | CP Fittings & CPVC Pipes Sales & Inventory Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#0d9488',
+                            600: '#0f766e',
+                            700: '#115e59',
+                            800: '#134e4a',
+                            900: '#042f2e',
+                            950: '#021e1d'
+                        },
+                        pipe: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .gradient-nav {
+            background: linear-gradient(135deg, #042f2e 0%, #0f172a 100%);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printInvoiceArea, #printInvoiceArea * {
+                visibility: visible;
+            }
+            #printInvoiceArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 20px;
+                background: white;
+                color: black;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 selection:bg-teal-600 selection:text-white antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[120] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Top Business Header Bar -->
+    <header class="gradient-nav text-white sticky top-0 z-40 shadow-xl border-b border-teal-900/60 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
+            
+            <!-- Store Identity -->
+            <div class="flex items-center space-x-3.5 cursor-pointer" onclick="switchView('dashboard')">
+                <div class="bg-gradient-to-tr from-teal-400 to-cyan-400 p-2.5 rounded-xl text-slate-950 font-black tracking-wider text-base shadow-md shadow-teal-500/20 flex items-center justify-center">
+                    <i data-lucide="droplet" class="w-5 h-5 fill-slate-950"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-black tracking-tight text-white flex items-center gap-1.5">
+                            AQUAPRO <span class="text-teal-400 font-light text-sm">ERP</span>
+                        </h1>
+                        <span class="text-[9px] font-bold uppercase tracking-wider bg-teal-950 text-teal-300 border border-teal-800 px-1.5 py-0.5 rounded">CP & CPVC Suite</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-medium">Daily Sales, Live Inventory & Contractor Khata Ledger</p>
+                </div>
+            </div>
+
+            <!-- Main App View Navigation -->
+            <nav class="flex items-center space-x-1 sm:space-x-2 text-xs font-semibold bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 overflow-x-auto max-w-full">
+                <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-btn active-nav px-3.5 py-2 rounded-xl text-white bg-teal-800 border border-teal-700/80 transition flex items-center gap-2 whitespace-nowrap shadow-xs">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 text-teal-300"></i> Dashboard
+                </button>
+                <button onclick="switchView('pos')" id="nav-pos" class="nav-btn px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="receipt" class="w-4 h-4 text-cyan-400"></i> New Sale (POS)
+                </button>
+                <button onclick="switchView('inventory')" id="nav-inventory" class="nav-btn px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="boxes" class="w-4 h-4 text-blue-400"></i> Stock Inventory
+                    <span id="lowStockBadge" class="hidden bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">0</span>
+                </button>
+                <button onclick="switchView('khata')" id="nav-khata" class="nav-btn px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i> Khata / Credit
+                </button>
+                <button onclick="switchView('reports')" id="nav-reports" class="nav-btn px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-400"></i> Sales Journal
+                </button>
+            </nav>
+
+            <!-- Quick Action: Quick New Bill -->
+            <div class="hidden lg:flex items-center space-x-2">
+                <button onclick="switchView('pos')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-slate-950 font-black text-xs transition shadow-md shadow-teal-500/20 flex items-center gap-1.5">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>+ Quick Sale</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full space-y-6">
+
+        <!-- ========================================================================= -->
+        <!-- VIEW 1: DASHBOARD & SUMMARY OVERVIEW                                      -->
+        <!-- ========================================================================= -->
+        <section id="view-dashboard" class="app-view space-y-6">
+            
+            <!-- Metric KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- Today's Total Sales -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Today's Sales</span>
+                        <div class="p-2 rounded-xl bg-teal-50 text-teal-600">
+                            <i data-lucide="indian-rupee" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span id="kpiTodaySales" class="text-2xl sm:text-3xl font-black text-slate-900 mono">₹0</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>Bills Created Today:</span>
+                        <span id="kpiTodayBillsCount" class="font-bold text-slate-800 mono">0 bills</span>
+                    </div>
+                </div>
+
+                <!-- Today's Cash in Hand / UPI -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Today's Collections</span>
+                        <div class="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                            <i data-lucide="wallet" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span id="kpiTodayCollected" class="text-2xl sm:text-3xl font-black text-emerald-600 mono">₹0</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>Cash + UPI Received:</span>
+                        <span id="kpiCollectedBreakdown" class="font-semibold text-emerald-700">₹0 Cash | ₹0 UPI</span>
+                    </div>
+                </div>
+
+                <!-- Total Outstanding Khata Dues -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Pending Khata</span>
+                        <div class="p-2 rounded-xl bg-amber-50 text-amber-600">
+                            <i data-lucide="book-marked" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span id="kpiTotalKhataDue" class="text-2xl sm:text-3xl font-black text-amber-600 mono">₹0</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>Contractors/Plumbers:</span>
+                        <span id="kpiKhataCustomersCount" class="font-bold text-slate-800">0 accounts</span>
+                    </div>
+                </div>
+
+                <!-- Total Stock Valuation -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Stock Valuation</span>
+                        <div class="p-2 rounded-xl bg-blue-50 text-blue-600">
+                            <i data-lucide="boxes" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span id="kpiStockValuation" class="text-2xl sm:text-3xl font-black text-slate-900 mono">₹0</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>Total Items in Stock:</span>
+                        <span id="kpiStockItemsCount" class="font-bold text-slate-800 mono">0 items</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- 7-Day Sales Trend Bar/Line -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="trending-up" class="w-4 h-4 text-teal-600"></i>
+                                7-Day Sales Velocity (₹)
+                            </h3>
+                            <p class="text-xs text-slate-400">Daily billing performance overview</p>
+                        </div>
+                        <button onclick="switchView('reports')" class="text-xs font-bold text-teal-600 hover:text-teal-700">View Journal &rarr;</button>
+                    </div>
+                    <div class="relative w-full h-64">
+                        <canvas id="salesTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Product Category Distribution -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="mb-4 pb-3 border-b border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i>
+                            Sales by Category
+                        </h3>
+                        <p class="text-xs text-slate-400">CP Fittings vs CPVC Pipes & Brass</p>
+                    </div>
+                    <div class="relative w-full h-52 flex items-center justify-center">
+                        <canvas id="categoryShareChart"></canvas>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-center">
+                        <div class="bg-slate-50 p-1.5 rounded-lg">
+                            <span class="text-slate-400 block text-[10px]">CP Fittings</span>
+                            <span id="statCpShare" class="font-bold text-slate-800 mono">0%</span>
+                        </div>
+                        <div class="bg-slate-50 p-1.5 rounded-lg">
+                            <span class="text-slate-400 block text-[10px]">CPVC Pipes</span>
+                            <span id="statCpvcShare" class="font-bold text-slate-800 mono">0%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Sales Table & Low Stock Alerts -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Recent Transactions (2 cols) -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 space-y-4">
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                <i data-lucide="history" class="w-4 h-4 text-slate-600"></i>
+                                Today's & Recent Sales
+                            </h3>
+                            <p class="text-xs text-slate-400">Latest customer orders and challans</p>
+                        </div>
+                        <button onclick="switchView('pos')" class="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold transition flex items-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> New Bill
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
+                                    <th class="py-2.5 px-3">Bill No / Date</th>
+                                    <th class="py-2.5 px-3">Customer / Contractor</th>
+                                    <th class="py-2.5 px-3">Items</th>
+                                    <th class="py-2.5 px-3">Total Amount</th>
+                                    <th class="py-2.5 px-3">Payment</th>
+                                    <th class="py-2.5 px-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentSalesTableBody" class="divide-y divide-slate-100 font-medium">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Low Stock & Reorder Box (1 col) -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                                    <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i>
+                                    Stock Reorder Alerts
+                                </h3>
+                                <p class="text-xs text-slate-400">Items below minimum reorder level</p>
+                            </div>
+                            <button onclick="switchView('inventory')" class="text-xs font-bold text-teal-600 hover:text-teal-700">Stock &rarr;</button>
+                        </div>
+
+                        <div id="lowStockItemsList" class="divide-y divide-slate-100 mt-2 space-y-2 max-h-80 overflow-y-auto">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 flex items-center justify-between">
+                        <span>Need to add incoming shipment?</span>
+                        <button onclick="openAddStockModal()" class="font-bold text-teal-700 hover:underline">+ Add Stock</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- VIEW 2: NEW SALE ENTRY / POINT OF SALE (POS)                              -->
+        <!-- ========================================================================= -->
+        <section id="view-pos" class="app-view hidden space-y-6">
+            
+            <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+                
+                <!-- Bill Top Header -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="p-2 rounded-xl bg-teal-50 text-teal-700">
+                                <i data-lucide="receipt" class="w-5 h-5"></i>
+                            </span>
+                            <div>
+                                <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">New Sales Bill / Invoice</h2>
+                                <p class="text-xs text-slate-500">Generate retail cash memo, tax invoice, or contractor credit slip</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-bold text-slate-500">Invoice No:</span>
+                        <span id="posInvoiceNo" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-900 font-black mono text-xs border border-slate-200">
+                            INV-2026-0001
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Customer Details Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50/70 p-5 rounded-2xl border border-slate-200">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Customer / Plumber Name *</label>
+                        <input type="text" id="posCustomerName" placeholder="e.g. Ramesh Plumber / Rajesh Kumar" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Mobile / WhatsApp Number</label>
+                        <input type="tel" id="posCustomerPhone" placeholder="e.g. 9876543210" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Customer Category</label>
+                        <select id="posCustomerType" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                            <option value="Plumber / Contractor" selected>Plumber / Contractor</option>
+                            <option value="Retail Customer">Retail Walk-in Customer</option>
+                            <option value="Builder / Site Project">Builder / Site Project</option>
+                            <option value="Hardware Dealer / Sub-dealer">Hardware Dealer</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Invoice Date</label>
+                        <input type="date" id="posInvoiceDate" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none mono">
+                    </div>
+                </div>
+
+                <!-- Line Items Table -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Bill Item Lines</h3>
+                        <button type="button" onclick="addPosLineItem()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Item Line
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 uppercase font-bold border-b border-slate-200">
+                                    <th class="py-3 px-3 w-10">#</th>
+                                    <th class="py-3 px-3 min-w-[220px]">Item Description (CP / CPVC)</th>
+                                    <th class="py-3 px-3 w-28">Available</th>
+                                    <th class="py-3 px-3 w-28">Qty</th>
+                                    <th class="py-3 px-3 w-28">Rate (₹)</th>
+                                    <th class="py-3 px-3 w-24">Disc %</th>
+                                    <th class="py-3 px-3 w-32 text-right">Total (₹)</th>
+                                    <th class="py-3 px-3 w-12 text-center"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="posLineItemsBody" class="divide-y divide-slate-100">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Calculations and Payment Breakdown -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4 border-t border-slate-100">
+                    
+                    <!-- Left: Notes & Tax Options -->
+                    <div class="lg:col-span-6 space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Site Delivery Note / Notes</label>
+                            <textarea id="posNotes" rows="2" placeholder="e.g. Delivered at Sky Heights Flat 402, Site supervisor Mohan" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
+                        </div>
+
+                        <!-- Tax Toggle -->
+                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                            <div>
+                                <span class="text-xs font-bold text-slate-800 block">Apply GST (18% Statutory)</span>
+                                <span class="text-[10px] text-slate-400">Applicable for formal Tax Invoices</span>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="posApplyGst" onchange="calculatePosTotals()" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Right: Payment Computation Box -->
+                    <div class="lg:col-span-6 bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+                        
+                        <div class="space-y-2 text-xs text-slate-600">
+                            <div class="flex justify-between font-semibold">
+                                <span>Subtotal</span>
+                                <span id="posSubtotal" class="font-bold text-slate-900 mono">₹0</span>
+                            </div>
+                            <div id="posGstRow" class="flex justify-between font-semibold text-slate-700 hidden">
+                                <span>GST (18%)</span>
+                                <span id="posGstAmount" class="font-bold mono">₹0</span>
+                            </div>
+                            <div class="flex justify-between text-sm font-extrabold text-slate-900 pt-2 border-t border-slate-200">
+                                <span>Net Bill Amount</span>
+                                <span id="posGrandTotal" class="text-teal-700 mono text-lg">₹0</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-200 space-y-3">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Payment Mode</label>
+                                    <select id="posPaymentMode" onchange="handlePaymentModeChange()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+                                        <option value="Cash" selected>Cash Payment</option>
+                                        <option value="UPI">UPI / GPay / PhonePe</option>
+                                        <option value="Bank Transfer">Bank Transfer / NEFT</option>
+                                        <option value="Credit / Khata">Credit (Khata / Udhari)</option>
+                                        <option value="Split Payment">Split (Part Cash / Part Due)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Amount Received (₹)</label>
+                                    <input type="number" id="posPaidAmount" value="0" min="0" step="10" oninput="calculatePosTotals()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 mono focus:ring-2 focus:ring-teal-500">
+                                </div>
+                            </div>
+
+                            <!-- Balance Due Reminder -->
+                            <div class="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white border border-slate-200">
+                                <span class="font-bold text-slate-600">Balance Pending (Added to Khata):</span>
+                                <span id="posBalanceDue" class="font-black text-rose-600 mono text-sm">₹0</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex items-center gap-3 pt-2">
+                            <button type="button" onclick="saveSalesBill(false)" class="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
+                                <i data-lucide="save" class="w-4 h-4"></i> Save Sales Entry
+                            </button>
+                            <button type="button" onclick="saveSalesBill(true)" class="flex-1 py-3 bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-teal-600/20">
+                                <i data-lucide="printer" class="w-4 h-4"></i> Save & Print Bill
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- VIEW 3: LIVE INVENTORY & STOCK MANAGEMENT                                -->
+        <!-- ========================================================================= -->
+        <section id="view-inventory" class="app-view hidden space-y-6">
+            
+            <!-- Inventory Header Banner -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="boxes" class="w-5 h-5 text-teal-600"></i>
+                        CP Fittings & CPVC Inventory Master
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Manage product stock counts, purchase rates, wholesale & retail pricing</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openAddStockModal()" class="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Add New Product
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="relative w-full sm:w-80">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="inventorySearchInput" oninput="filterInventory()" placeholder="Search by item name, size, category..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+
+                <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+                    <button onclick="filterInventoryCategory('All')" class="inv-filter active-inv-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition">All Items</button>
+                    <button onclick="filterInventoryCategory('CPVC Pipes & SDR')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">CPVC Pipes</button>
+                    <button onclick="filterInventoryCategory('CPVC Fittings')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">CPVC Fittings</button>
+                    <button onclick="filterInventoryCategory('CP Bathroom Fittings')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">CP Bathroom Taps</button>
+                    <button onclick="filterInventoryCategory('Valves & Brass')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Valves & Brass</button>
+                </div>
+            </div>
+
+            <!-- Inventory Items Table -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+                                <th class="py-3 px-4">Product Code & Description</th>
+                                <th class="py-3 px-4">Category</th>
+                                <th class="py-3 px-4">Current Stock</th>
+                                <th class="py-3 px-4">Purchase Price</th>
+                                <th class="py-3 px-4">Selling Rate</th>
+                                <th class="py-3 px-4">Stock Value</th>
+                                <th class="py-3 px-4">Status</th>
+                                <th class="py-3 px-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody" class="divide-y divide-slate-100 font-medium">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- VIEW 4: CUSTOMER KHATA & CREDIT LEDGER                                    -->
+        <!-- ========================================================================= -->
+        <section id="view-khata" class="app-view hidden space-y-6">
+            
+            <!-- Khata Header -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="book-open" class="w-5 h-5 text-amber-500"></i>
+                        Contractor & Plumber Khata (Credit Ledger)
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Track outstanding credits, record partial payments, and send WhatsApp payment reminders</p>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 px-4 py-2 rounded-2xl flex items-center gap-3">
+                    <span class="text-xs font-bold text-amber-900">Total Market Receivables:</span>
+                    <span id="khataTotalReceivables" class="text-base font-black text-amber-700 mono">₹0</span>
+                </div>
+            </div>
+
+            <!-- Customer Search & Filter -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
+                <div class="relative w-full sm:w-80">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" id="khataSearchInput" oninput="filterKhata()" placeholder="Search contractor / plumber name or phone..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <span class="text-xs font-bold text-slate-400"><span id="khataFilteredCount">0</span> Accounts</span>
+            </div>
+
+            <!-- Khata Cards Grid -->
+            <div id="khataAccountsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Populated dynamically -->
+            </div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- VIEW 5: SALES JOURNAL & REPORTS                                          -->
+        <!-- ========================================================================= -->
+        <section id="view-reports" class="app-view hidden space-y-6">
+            
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-600"></i>
+                        Daily Sales Journal & Tax Reports
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Filter sales by date range, analyze margins, and export to Excel/CSV</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="exportSalesCSV()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
+                        <i data-lucide="download" class="w-4 h-4 text-teal-400"></i> Export Sales CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Date Filter Strip -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button onclick="filterReportDate('today')" id="rep-today" class="rep-date-filter active-rep-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition">Today</button>
+                    <button onclick="filterReportDate('yesterday')" id="rep-yesterday" class="rep-date-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Yesterday</button>
+                    <button onclick="filterReportDate('7days')" id="rep-7days" class="rep-date-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Last 7 Days</button>
+                    <button onclick="filterReportDate('month')" id="rep-month" class="rep-date-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">This Month</button>
+                    <button onclick="filterReportDate('all')" id="rep-all" class="rep-date-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">All Time</button>
+                </div>
+
+                <div class="flex items-center gap-2 text-xs font-semibold">
+                    <span class="text-slate-400">Period Total:</span>
+                    <span id="reportPeriodRevenue" class="text-slate-900 font-bold mono">₹0</span>
+                </div>
+            </div>
+
+            <!-- Detailed Journal Table -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
+                                <th class="py-3 px-4">Invoice #</th>
+                                <th class="py-3 px-4">Date</th>
+                                <th class="py-3 px-4">Customer Name & Phone</th>
+                                <th class="py-3 px-4">Type</th>
+                                <th class="py-3 px-4">Payment Method</th>
+                                <th class="py-3 px-4">Amount (₹)</th>
+                                <th class="py-3 px-4">Status</th>
+                                <th class="py-3 px-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsTableBody" class="divide-y divide-slate-100 font-medium">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: ADD / EDIT PRODUCT STOCK                                           -->
+    <!-- ========================================================================= -->
+    <div id="addStockModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-lg w-full rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            
+            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="bg-teal-500 p-1.5 rounded-lg text-slate-950">
+                        <i data-lucide="plus" class="w-4 h-4 font-bold"></i>
+                    </div>
+                    <h3 class="text-sm font-bold">Add / Update Product in Inventory</h3>
+                </div>
+                <button onclick="closeAddStockModal()" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleSaveProduct(event)" class="p-6 space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Product Description *</label>
+                    <input type="text" id="prodName" required placeholder="e.g. CPVC Pipe 1 inch SDR 11 (3 Meter)" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900 focus:ring-2 focus:ring-teal-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Category</label>
+                        <select id="prodCategory" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800">
+                            <option value="CPVC Pipes & SDR">CPVC Pipes & SDR</option>
+                            <option value="CPVC Fittings">CPVC Fittings (Elbow/Tee/Coupler)</option>
+                            <option value="CP Bathroom Fittings">CP Bathroom Fittings (Bib/Pillar/Mixer)</option>
+                            <option value="Valves & Brass">Valves & Brass MTA/FTA</option>
+                            <option value="Solvents & Consumables">Solvents & Consumables</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Unit of Measure</label>
+                        <select id="prodUnit" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800">
+                            <option value="Pcs">Pieces (Pcs)</option>
+                            <option value="Lengths">Lengths / Pipes</option>
+                            <option value="Meters">Meters</option>
+                            <option value="Boxes">Boxes</option>
+                            <option value="Bottles">Bottles</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Stock Qty</label>
+                        <input type="number" id="prodStock" required min="0" value="50" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Purchase Rate (₹)</label>
+                        <input type="number" id="prodCost" required min="0" step="0.5" value="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Selling Rate (₹)</label>
+                        <input type="number" id="prodPrice" required min="0" step="0.5" value="140" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-teal-700">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Min. Reorder Alert Level</label>
+                        <input type="number" id="prodMinStock" value="10" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">HSN / Item Code</label>
+                        <input type="text" id="prodHsn" placeholder="e.g. 3917 / 8481" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold mono">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeAddStockModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold shadow-sm">Save to Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: RECORD KHATA PAYMENT RECEIVED                                      -->
+    <!-- ========================================================================= -->
+    <div id="khataPaymentModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4">
+            <div class="flex justify-between items-start pb-3 border-b border-slate-100">
+                <div>
+                    <h4 class="text-base font-bold text-slate-900">Record Payment Received</h4>
+                    <p class="text-xs text-slate-500">Update Khata balance for <span id="khataPayCustName" class="font-bold text-slate-900"></span></p>
+                </div>
+                <button onclick="closeKhataPaymentModal()" class="text-slate-400 hover:text-slate-700">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 flex justify-between items-center text-xs">
+                <span class="text-amber-900 font-medium">Current Balance Due:</span>
+                <span id="khataPayCurrentDue" class="font-black text-amber-700 mono text-sm">₹0</span>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Amount Collected (₹) *</label>
+                    <input type="number" id="khataPayAmount" placeholder="e.g. 5000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-emerald-700 text-sm">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Payment Method</label>
+                    <select id="khataPayMethod" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800">
+                        <option value="Cash" selected>Cash Payment</option>
+                        <option value="UPI">UPI / GPay / PhonePe</option>
+                        <option value="Bank Transfer">Bank Transfer / Cheque</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Reference / Note</label>
+                    <input type="text" id="khataPayNote" placeholder="e.g. Site Flat 204 payment clearance" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button onclick="closeKhataPaymentModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold text-xs">Cancel</button>
+                <button onclick="submitKhataPayment()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-sm">Record Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- PRINTABLE INVOICE / SALES SLIP MODAL                                      -->
+    <!-- ========================================================================= -->
+    <div id="invoiceModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-[115] hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white max-w-2xl w-full rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-8">
+            
+            <div class="p-4 bg-slate-900 text-white flex justify-between items-center no-print">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="printer" class="w-4 h-4 text-teal-400"></i>
+                    <span class="text-xs font-bold">Print Preview / Tax Invoice</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="px-3.5 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs rounded-lg transition shadow-xs flex items-center gap-1">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print Bill
+                    </button>
+                    <button onclick="closeInvoiceModal()" class="text-slate-400 hover:text-white p-1">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Actual Print Area -->
+            <div id="printInvoiceArea" class="p-8 space-y-6 text-slate-900 bg-white">
+                
+                <!-- Bill Header -->
+                <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-black tracking-tight text-slate-900">AQUAPRO FITTINGS & PIPES</h2>
+                        <p class="text-xs font-bold text-slate-600 mt-0.5">Wholesale & Retail: CP Bathroom Fittings, CPVC SDR 11/13.5 Pipes, Brass Valves</p>
+                        <p class="text-[11px] text-slate-500">Shop No 14, Plumbing Hardware Market, Main Road • Mob: +91 98765 43210</p>
+                        <p class="text-[11px] text-slate-500 font-semibold mono">GSTIN: 27AABCA9820M1ZQ</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-block px-2.5 py-1 bg-slate-900 text-white text-[10px] font-black uppercase rounded tracking-wider">RETAIL INVOICE</span>
+                        <div class="mt-2 text-xs font-bold mono">
+                            <div>Invoice: <span id="invPrintNo">INV-2026-0001</span></div>
+                            <div class="text-slate-500 font-medium">Date: <span id="invPrintDate">2026-08-27</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Details -->
+                <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Billed To Customer:</span>
+                        <div id="invPrintCustName" class="font-extrabold text-slate-900 text-sm">Ramesh Plumber</div>
+                        <div id="invPrintCustPhone" class="text-slate-600 font-semibold mono">+91 9876543210</div>
+                        <div id="invPrintCustType" class="text-[10px] text-teal-700 font-bold">Plumber / Contractor</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Payment Status:</span>
+                        <div id="invPrintPayMode" class="font-bold text-slate-900">Cash Payment</div>
+                        <div id="invPrintNotes" class="text-[11px] text-slate-500 italic mt-1"></div>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-y-2 border-slate-900 text-slate-900 font-black uppercase text-[10px]">
+                                <th class="py-2">#</th>
+                                <th class="py-2">Item Description</th>
+                                <th class="py-2 text-center">Qty</th>
+                                <th class="py-2 text-right">Rate</th>
+                                <th class="py-2 text-right">Disc</th>
+                                <th class="py-2 text-right">Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invPrintItemsBody" class="divide-y divide-slate-200 font-medium">
+                            <!-- Items -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Summary Totals -->
+                <div class="border-t-2 border-slate-900 pt-3 flex justify-between items-start text-xs">
+                    <div class="max-w-xs text-[10px] text-slate-500 space-y-1">
+                        <p class="font-bold text-slate-700">Terms & Conditions:</p>
+                        <p>1. Goods once sold will not be taken back without original bill.</p>
+                        <p>2. Subject to local jurisdiction only.</p>
+                    </div>
+                    <div class="w-64 space-y-1 text-right">
+                        <div class="flex justify-between text-slate-600 font-medium">
+                            <span>Subtotal:</span>
+                            <span id="invPrintSubtotal" class="font-bold mono text-slate-900">₹0</span>
+                        </div>
+                        <div id="invPrintGstRow" class="flex justify-between text-slate-600 font-medium hidden">
+                            <span>GST (18%):</span>
+                            <span id="invPrintGst" class="font-bold mono text-slate-900">₹0</span>
+                        </div>
+                        <div class="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-slate-300">
+                            <span>Grand Total:</span>
+                            <span id="invPrintGrandTotal" class="mono text-base">₹0</span>
+                        </div>
+                        <div class="flex justify-between text-xs font-bold text-emerald-700">
+                            <span>Amount Paid:</span>
+                            <span id="invPrintPaid" class="mono">₹0</span>
+                        </div>
+                        <div id="invPrintDueRow" class="flex justify-between text-xs font-bold text-rose-600 hidden">
+                            <span>Khata Balance Due:</span>
+                            <span id="invPrintDue" class="mono">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signatory -->
+                <div class="pt-8 flex justify-between items-end text-center text-xs">
+                    <div>
+                        <div class="w-32 border-b border-slate-400 mx-auto"></div>
+                        <span class="text-[10px] text-slate-500 mt-1 block">Customer Signature</span>
+                    </div>
+                    <div>
+                        <div class="w-36 border-b border-slate-400 mx-auto"></div>
+                        <span class="text-[10px] font-bold text-slate-800 mt-1 block">For AQUAPRO FITTINGS</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Global App Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-12 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-2">
+                <span class="font-extrabold text-white">AQUAPRO CP & CPVC ERP</span>
+                <span>•</span>
+                <span class="text-teal-400">Offline-Ready Local Database</span>
+            </div>
+            <div class="flex items-center gap-4 text-[11px] text-slate-400">
+                <button onclick="exportFullBackupJSON()" class="hover:text-white transition flex items-center gap-1">
+                    <i data-lucide="download-cloud" class="w-3.5 h-3.5 text-teal-400"></i> Backup Data
+                </button>
+                <button onclick="resetToDemoData()" class="hover:text-rose-400 transition flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Reset Demo Data
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========================================================================= -->
+    <!-- APPLICATION JAVASCRIPT LOGIC & STATE PERSISTENCE                          -->
+    <!-- ========================================================================= -->
+    <script>
+        // Sample Initial Catalog of CP Fittings & CPVC Pipes
+        const INITIAL_INVENTORY = [
+            { id: 'p_1', name: 'CPVC Pipe 1" SDR 11 (3 Meter Length)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 85, costPrice: 280, sellPrice: 380, minStock: 20, hsn: '3917' },
+            { id: 'p_2', name: 'CPVC Pipe 3/4" SDR 11 (3 Meter Length)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 120, costPrice: 195, sellPrice: 265, minStock: 30, hsn: '3917' },
+            { id: 'p_3', name: 'CPVC Pipe 1/2" SDR 11 (3 Meter Length)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 15, costPrice: 140, sellPrice: 190, minStock: 25, hsn: '3917' }, // Low stock
+            { id: 'p_4', name: 'CPVC Brass Elbow 3/4" x 1/2" (Female Thread)', category: 'CPVC Fittings', unit: 'Pcs', stock: 240, costPrice: 62, sellPrice: 88, minStock: 50, hsn: '3917' },
+            { id: 'p_5', name: 'CPVC Plain Elbow 1" 90 Degree', category: 'CPVC Fittings', unit: 'Pcs', stock: 180, costPrice: 22, sellPrice: 35, minStock: 40, hsn: '3917' },
+            { id: 'p_6', name: 'CPVC Plain Tee 1" Equal', category: 'CPVC Fittings', unit: 'Pcs', stock: 95, costPrice: 32, sellPrice: 48, minStock: 30, hsn: '3917' },
+            { id: 'p_7', name: 'CPVC Brass MTA (Male Thread) 3/4"', category: 'Valves & Brass', unit: 'Pcs', stock: 110, costPrice: 58, sellPrice: 82, minStock: 30, hsn: '7412' },
+            { id: 'p_8', name: 'CPVC Ball Valve 1" Heavy', category: 'Valves & Brass', unit: 'Pcs', stock: 8, costPrice: 160, sellPrice: 225, minStock: 15, hsn: '8481' }, // Low stock
+            { id: 'p_9', name: 'CP Brass Bib Cock with Foam Flow (Chrome Plated)', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 45, costPrice: 290, sellPrice: 450, minStock: 10, hsn: '8481' },
+            { id: 'p_10', name: 'CP Brass Long Body Tap 2-in-1 Dual Knob', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 32, costPrice: 520, sellPrice: 790, minStock: 10, hsn: '8481' },
+            { id: 'p_11', name: 'CP Pillar Cock for Wash Basin (Heavy Brass)', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 28, costPrice: 420, sellPrice: 650, minStock: 8, hsn: '8481' },
+            { id: 'p_12', name: 'CP Angle Valve Ceramic Disc (Heavy)', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 150, costPrice: 145, sellPrice: 230, minStock: 30, hsn: '8481' },
+            { id: 'p_13', name: 'CP Concealed Stop Cock 15mm with Flange', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 18, costPrice: 360, sellPrice: 540, minStock: 12, hsn: '8481' },
+            { id: 'p_14', name: 'CP Overhead Rain Shower 4x4" with Shower Arm', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 6, costPrice: 480, sellPrice: 750, minStock: 10, hsn: '8481' }, // Low stock
+            { id: 'p_15', name: 'CPVC Solvent Cement 250ml Tin (Heavy Duty)', category: 'Solvents & Consumables', unit: 'Bottles', stock: 65, costPrice: 110, sellPrice: 160, minStock: 20, hsn: '3506' },
+            { id: 'p_16', name: 'PTFE Teflon Tape (12mm x 10 Meter)', category: 'Solvents & Consumables', unit: 'Pcs', stock: 300, costPrice: 8, sellPrice: 15, minStock: 50, hsn: '3919' }
+        ];
+
+        // Sample Initial Sales
+        const INITIAL_SALES = [
+            {
+                invoiceNo: 'INV-2026-0001',
+                date: getTodayDateString(),
+                customerName: 'Ramesh Plumber & Sons',
+                customerPhone: '9823412345',
+                customerType: 'Plumber / Contractor',
+                items: [
+                    { productId: 'p_1', name: 'CPVC Pipe 1" SDR 11 (3 Meter Length)', qty: 10, rate: 380, disc: 5, total: 3610 },
+                    { productId: 'p_4', name: 'CPVC Brass Elbow 3/4" x 1/2"', qty: 20, rate: 88, disc: 0, total: 1760 },
+                    { productId: 'p_15', name: 'CPVC Solvent Cement 250ml', qty: 2, rate: 160, disc: 0, total: 320 }
+                ],
+                subtotal: 5690,
+                applyGst: false,
+                gstAmount: 0,
+                grandTotal: 5690,
+                paymentMode: 'Cash',
+                paidAmount: 5690,
+                balanceDue: 0,
+                notes: 'Delivered for Shanti Nagar Site'
+            },
+            {
+                invoiceNo: 'INV-2026-0002',
+                date: getTodayDateString(),
+                customerName: 'Shree Sai Builders & Infra',
+                customerPhone: '9845098450',
+                customerType: 'Builder / Site Project',
+                items: [
+                    { productId: 'p_9', name: 'CP Brass Bib Cock with Foam Flow', qty: 12, rate: 450, disc: 10, total: 4860 },
+                    { productId: 'p_11', name: 'CP Pillar Cock for Wash Basin', qty: 6, rate: 650, disc: 10, total: 3510 },
+                    { productId: 'p_12', name: 'CP Angle Valve Ceramic Disc', qty: 24, rate: 230, disc: 5, total: 5244 }
+                ],
+                subtotal: 13614,
+                applyGst: true,
+                gstAmount: 2450.52,
+                grandTotal: 16064.52,
+                paymentMode: 'Credit / Khata',
+                paidAmount: 5000,
+                balanceDue: 11064.52,
+                notes: 'Sky Villa Tower B Fitting Phase 1'
+            }
+        ];
+
+        // State variables
+        let inventory = [];
+        let sales = [];
+        let khataPayments = []; // { id, customerName, date, amount, method, note }
+        let currentPosLines = [];
+        let activeInvCategory = 'All';
+        let salesTrendChartInstance = null;
+        let categoryShareChartInstance = null;
+        let activeReportFilter = 'today';
+        let activeKhataCustomer = null;
+
+        function getTodayDateString() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Initialize Data from LocalStorage
+        function initData() {
+            const savedInv = localStorage.getItem('aquapro_inventory');
+            const savedSales = localStorage.getItem('aquapro_sales');
+            const savedKhataPay = localStorage.getItem('aquapro_khata_payments');
+
+            if (savedInv) {
+                inventory = JSON.parse(savedInv);
+            } else {
+                inventory = [...INITIAL_INVENTORY];
+                saveInventory();
+            }
+
+            if (savedSales) {
+                sales = JSON.parse(savedSales);
+            } else {
+                sales = [...INITIAL_SALES];
+                saveSales();
+            }
+
+            if (savedKhataPay) {
+                khataPayments = JSON.parse(savedKhataPay);
+            } else {
+                khataPayments = [];
+                saveKhataPayments();
+            }
+        }
+
+        function saveInventory() {
+            localStorage.setItem('aquapro_inventory', JSON.stringify(inventory));
+        }
+
+        function saveSales() {
+            localStorage.setItem('aquapro_sales', JSON.stringify(sales));
+        }
+
+        function saveKhataPayments() {
+            localStorage.setItem('aquapro_khata_payments', JSON.stringify(khataPayments));
+        }
+
+        // Formatter Helper
+        function formatINR(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 2
+            }).format(Number(amount) || 0);
+        }
+
+        // Toast
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `px-4 py-3 rounded-2xl shadow-xl border text-xs font-bold flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto ${
+                type === 'success' ? 'bg-slate-900 text-white border-teal-500/40' : 'bg-rose-900 text-white border-rose-500/40'
+            }`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-4 h-4 text-teal-400"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Switch App Views
+        function switchView(viewId) {
+            document.querySelectorAll('.app-view').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById('view-' + viewId);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = 'nav-btn px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap';
+            });
+            
+            const activeNav = document.getElementById('nav-' + viewId);
+            if (activeNav) {
+                activeNav.className = 'nav-btn active-nav px-3.5 py-2 rounded-xl text-white bg-teal-800 border border-teal-700/80 transition flex items-center gap-2 whitespace-nowrap shadow-xs';
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            if (viewId === 'dashboard') {
+                renderDashboard();
+            } else if (viewId === 'pos') {
+                initPosForm();
+            } else if (viewId === 'inventory') {
+                renderInventoryTable();
+            } else if (viewId === 'khata') {
+                renderKhataAccounts();
+            } else if (viewId === 'reports') {
+                renderReportsTable();
+            }
+        }
+
+        // =========================================================================
+        // DASHBOARD RENDER LOGIC
+        // =========================================================================
+        function renderDashboard() {
+            const todayStr = getTodayDateString();
+            const todaySales = sales.filter(s => s.date === todayStr);
+
+            const todayTotalGross = todaySales.reduce((sum, s) => sum + s.grandTotal, 0);
+            const todayTotalPaid = todaySales.reduce((sum, s) => sum + s.paidAmount, 0);
+            
+            const todayCash = todaySales.filter(s => s.paymentMode === 'Cash').reduce((sum, s) => sum + s.paidAmount, 0);
+            const todayUpi = todaySales.filter(s => s.paymentMode === 'UPI' || s.paymentMode === 'Bank Transfer').reduce((sum, s) => sum + s.paidAmount, 0);
+
+            // Total Khata computation
+            const khataMap = computeKhataBalances();
+            let totalPendingKhata = 0;
+            let khataAccountsCount = 0;
+            Object.values(khataMap).forEach(acc => {
+                if (acc.balance > 0) {
+                    totalPendingKhata += acc.balance;
+                    khataAccountsCount++;
+                }
+            });
+
+            // Total Stock Valuation
+            const totalStockValue = inventory.reduce((sum, item) => sum + (item.stock * item.costPrice), 0);
+            const totalStockItemsCount = inventory.reduce((sum, item) => sum + item.stock, 0);
+
+            // Update KPI elements
+            document.getElementById('kpiTodaySales').innerText = formatINR(todayTotalGross);
+            document.getElementById('kpiTodayBillsCount').innerText = `${todaySales.length} bills`;
+            document.getElementById('kpiTodayCollected').innerText = formatINR(todayTotalPaid);
+            document.getElementById('kpiCollectedBreakdown').innerText = `${formatINR(todayCash)} Cash | ${formatINR(todayUpi)} UPI`;
+            document.getElementById('kpiTotalKhataDue').innerText = formatINR(totalPendingKhata);
+            document.getElementById('kpiKhataCustomersCount').innerText = `${khataAccountsCount} accounts`;
+            document.getElementById('kpiStockValuation').innerText = formatINR(totalStockValue);
+            document.getElementById('kpiStockItemsCount').innerText = `${totalStockItemsCount} items in stock`;
+
+            renderRecentSalesTable();
+            renderLowStockAlerts();
+            renderDashboardCharts();
+        }
+
+        function renderRecentSalesTable() {
+            const tbody = document.getElementById('recentSalesTableBody');
+            tbody.innerHTML = '';
+
+            const sorted = [...sales].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">No sales recorded yet. Click + Quick Sale to create your first bill!</td></tr>`;
+                return;
+            }
+
+            sorted.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+
+                const isCredit = s.balanceDue > 0;
+                const statusBadge = isCredit 
+                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Pending Due: ${formatINR(s.balanceDue)}</span>`
+                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Fully Paid</span>`;
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3">
+                        <span class="font-bold text-slate-900 mono block">${s.invoiceNo}</span>
+                        <span class="text-[10px] text-slate-400">${s.date}</span>
+                    </td>
+                    <td class="py-2.5 px-3">
+                        <span class="font-bold text-slate-800 block">${s.customerName}</span>
+                        <span class="text-[10px] text-slate-400">${s.customerPhone || 'Walk-in'}</span>
+                    </td>
+                    <td class="py-2.5 px-3 font-semibold text-slate-600">${s.items.length} items</td>
+                    <td class="py-2.5 px-3 font-bold text-slate-900 mono">${formatINR(s.grandTotal)}</td>
+                    <td class="py-2.5 px-3">
+                        ${statusBadge}
+                    </td>
+                    <td class="py-2.5 px-3 text-right">
+                        <button onclick="previewInvoice('${s.invoiceNo}')" class="p-1 text-slate-500 hover:text-teal-600 rounded transition" title="Print Invoice">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        }
+
+        function renderLowStockAlerts() {
+            const container = document.getElementById('lowStockItemsList');
+            container.innerHTML = '';
+
+            const lowItems = inventory.filter(i => i.stock <= i.minStock);
+            const badge = document.getElementById('lowStockBadge');
+            if (lowItems.length > 0) {
+                badge.innerText = lowItems.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            if (lowItems.length === 0) {
+                container.innerHTML = `
+                    <div class="py-8 text-center text-slate-400">
+                        <i data-lucide="check-circle" class="w-8 h-8 text-teal-400 mx-auto mb-1"></i>
+                        <p class="text-xs font-bold text-slate-600">All products well-stocked!</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            lowItems.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'py-2 flex items-center justify-between';
+                div.innerHTML = `
+                    <div>
+                        <span class="font-bold text-slate-900 text-xs block">${item.name}</span>
+                        <span class="text-[10px] text-slate-400">${item.category}</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black bg-rose-100 text-rose-700 mono block">
+                            ${item.stock} / ${item.minStock} ${item.unit}
+                        </span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderDashboardCharts() {
+            // 7 Days Trend
+            const trendDates = [];
+            const trendTotals = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+                trendDates.push(d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' }));
+
+                const dayTotal = sales.filter(s => s.date === dateStr).reduce((sum, s) => sum + s.grandTotal, 0);
+                trendTotals.push(dayTotal);
+            }
+
+            const ctxTrend = document.getElementById('salesTrendChart').getContext('2d');
+            if (salesTrendChartInstance) salesTrendChartInstance.destroy();
+
+            const gradient = ctxTrend.createLinearGradient(0, 0, 0, 200);
+            gradient.addColorStop(0, 'rgba(13, 148, 136, 0.3)');
+            gradient.addColorStop(1, 'rgba(13, 148, 136, 0.0)');
+
+            salesTrendChartInstance = new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: trendDates,
+                    datasets: [{
+                        label: 'Daily Sales (₹)',
+                        data: trendTotals,
+                        borderColor: '#0d9488',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#0f766e',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` Sales: ${formatINR(ctx.raw)}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: (v) => '₹' + v
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Category Share
+            let cpvcTotal = 0;
+            let cpTotal = 0;
+            let otherTotal = 0;
+
+            sales.forEach(s => {
+                s.items.forEach(item => {
+                    const prod = inventory.find(p => p.id === item.productId);
+                    if (prod && prod.category.includes('CPVC')) {
+                        cpvcTotal += item.total;
+                    } else if (prod && prod.category.includes('CP Bathroom')) {
+                        cpTotal += item.total;
+                    } else {
+                        otherTotal += item.total;
+                    }
+                });
+            });
+
+            const totalCat = (cpvcTotal + cpTotal + otherTotal) || 1;
+            document.getElementById('statCpShare').innerText = ((cpTotal / totalCat) * 100).toFixed(0) + '%';
+            document.getElementById('statCpvcShare').innerText = ((cpvcTotal / totalCat) * 100).toFixed(0) + '%';
+
+            const ctxCat = document.getElementById('categoryShareChart').getContext('2d');
+            if (categoryShareChartInstance) categoryShareChartInstance.destroy();
+
+            categoryShareChartInstance = new Chart(ctxCat, {
+                type: 'doughnut',
+                data: {
+                    labels: ['CPVC Pipes & Fittings', 'CP Bathroom Taps', 'Valves & Solvents'],
+                    datasets: [{
+                        data: [cpvcTotal || 1, cpTotal || 1, otherTotal || 0.5],
+                        backgroundColor: ['#3b82f6', '#0d9488', '#f59e0b'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // =========================================================================
+        // POS / BILLING LOGIC
+        // =========================================================================
+        function initPosForm() {
+            const nextInvoiceNumber = 'INV-2026-' + String(sales.length + 1).padStart(4, '0');
+            document.getElementById('posInvoiceNo').innerText = nextInvoiceNumber;
+            document.getElementById('posInvoiceDate').value = getTodayDateString();
+            document.getElementById('posCustomerName').value = '';
+            document.getElementById('posCustomerPhone').value = '';
+            document.getElementById('posNotes').value = '';
+            document.getElementById('posApplyGst').checked = false;
+            document.getElementById('posPaymentMode').value = 'Cash';
+
+            currentPosLines = [];
+            addPosLineItem(); // add 1 blank line
+            calculatePosTotals();
+        }
+
+        function addPosLineItem() {
+            const lineId = 'line_' + Date.now() + Math.random().toString(36).substr(2, 4);
+            currentPosLines.push({
+                lineId,
+                productId: inventory[0] ? inventory[0].id : '',
+                qty: 1,
+                rate: inventory[0] ? inventory[0].sellPrice : 0,
+                disc: 0,
+                total: inventory[0] ? inventory[0].sellPrice : 0
+            });
+            renderPosLines();
+            calculatePosTotals();
+        }
+
+        function removePosLineItem(lineId) {
+            currentPosLines = currentPosLines.filter(l => l.lineId !== lineId);
+            if (currentPosLines.length === 0) {
+                addPosLineItem();
+            } else {
+                renderPosLines();
+                calculatePosTotals();
+            }
+        }
+
+        function renderPosLines() {
+            const tbody = document.getElementById('posLineItemsBody');
+            tbody.innerHTML = '';
+
+            currentPosLines.forEach((line, idx) => {
+                const prod = inventory.find(p => p.id === line.productId) || inventory[0];
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+
+                tr.innerHTML = `
+                    <td class="py-2.5 px-3 font-bold text-slate-400 text-center">${idx + 1}</td>
+                    <td class="py-2.5 px-3">
+                        <select onchange="updatePosLineProduct('${line.lineId}', this.value)" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-teal-500">
+                            ${inventory.map(p => `<option value="${p.id}" ${p.id === line.productId ? 'selected' : ''}>${p.name} (${p.category})</option>`).join('')}
+                        </select>
+                    </td>
+                    <td class="py-2.5 px-3">
+                        <span class="font-bold text-slate-700 mono">${prod ? prod.stock : 0} ${prod ? prod.unit : ''}</span>
+                    </td>
+                    <td class="py-2.5 px-3">
+                        <input type="number" min="1" value="${line.qty}" oninput="updatePosLineQty('${line.lineId}', this.value)" class="w-20 px-2 py-1 bg-white border border-slate-300 rounded-lg font-bold mono text-xs">
+                    </td>
+                    <td class="py-2.5 px-3">
+                        <input type="number" min="0" step="0.5" value="${line.rate}" oninput="updatePosLineRate('${line.lineId}', this.value)" class="w-24 px-2 py-1 bg-white border border-slate-300 rounded-lg font-bold mono text-xs">
+                    </td>
+                    <td class="py-2.5 px-3">
+                        <input type="number" min="0" max="100" value="${line.disc}" oninput="updatePosLineDisc('${line.lineId}', this.value)" class="w-16 px-2 py-1 bg-white border border-slate-300 rounded-lg font-bold mono text-xs" placeholder="0">
+                    </td>
+                    <td class="py-2.5 px-3 text-right font-black text-slate-900 mono">
+                        ${formatINR(line.total)}
+                    </td>
+                    <td class="py-2.5 px-3 text-center">
+                        <button type="button" onclick="removePosLineItem('${line.lineId}')" class="text-slate-400 hover:text-rose-600 p-1">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        }
+
+        function updatePosLineProduct(lineId, productId) {
+            const line = currentPosLines.find(l => l.lineId === lineId);
+            const prod = inventory.find(p => p.id === productId);
+            if (line && prod) {
+                line.productId = productId;
+                line.rate = prod.sellPrice;
+                recomputeLineTotal(line);
+                renderPosLines();
+                calculatePosTotals();
+            }
+        }
+
+        function updatePosLineQty(lineId, val) {
+            const line = currentPosLines.find(l => l.lineId === lineId);
+            if (line) {
+                line.qty = Math.max(1, parseFloat(val) || 1);
+                recomputeLineTotal(line);
+                renderPosLines();
+                calculatePosTotals();
+            }
+        }
+
+        function updatePosLineRate(lineId, val) {
+            const line = currentPosLines.find(l => l.lineId === lineId);
+            if (line) {
+                line.rate = Math.max(0, parseFloat(val) || 0);
+                recomputeLineTotal(line);
+                renderPosLines();
+                calculatePosTotals();
+            }
+        }
+
+        function updatePosLineDisc(lineId, val) {
+            const line = currentPosLines.find(l => l.lineId === lineId);
+            if (line) {
+                line.disc = Math.min(100, Math.max(0, parseFloat(val) || 0));
+                recomputeLineTotal(line);
+                renderPosLines();
+                calculatePosTotals();
+            }
+        }
+
+        function recomputeLineTotal(line) {
+            const gross = line.qty * line.rate;
+            const discountAmt = gross * (line.disc / 100);
+            line.total = gross - discountAmt;
+        }
+
+        function calculatePosTotals() {
+            const subtotal = currentPosLines.reduce((sum, l) => sum + l.total, 0);
+            const applyGst = document.getElementById('posApplyGst').checked;
+            const gstAmount = applyGst ? subtotal * 0.18 : 0;
+            const grandTotal = subtotal + gstAmount;
+
+            document.getElementById('posSubtotal').innerText = formatINR(subtotal);
+            if (applyGst) {
+                document.getElementById('posGstRow').classList.remove('hidden');
+                document.getElementById('posGstAmount').innerText = formatINR(gstAmount);
+            } else {
+                document.getElementById('posGstRow').classList.add('hidden');
+            }
+            document.getElementById('posGrandTotal').innerText = formatINR(grandTotal);
+
+            const mode = document.getElementById('posPaymentMode').value;
+            const paidInput = document.getElementById('posPaidAmount');
+            
+            if (mode === 'Cash' || mode === 'UPI' || mode === 'Bank Transfer') {
+                paidInput.value = grandTotal.toFixed(2);
+            } else if (mode === 'Credit / Khata') {
+                paidInput.value = 0;
+            }
+
+            const paidAmt = parseFloat(paidInput.value) || 0;
+            const balanceDue = Math.max(0, grandTotal - paidAmt);
+            document.getElementById('posBalanceDue').innerText = formatINR(balanceDue);
+        }
+
+        function handlePaymentModeChange() {
+            calculatePosTotals();
+        }
+
+        function saveSalesBill(andPrint = false) {
+            const customerName = (document.getElementById('posCustomerName').value || '').trim();
+            if (!customerName) {
+                showToast("Please enter customer / contractor name!", "error");
+                document.getElementById('posCustomerName').focus();
+                return;
+            }
+
+            if (currentPosLines.length === 0) {
+                showToast("Please add at least 1 item line!", "error");
+                return;
+            }
+
+            const subtotal = currentPosLines.reduce((sum, l) => sum + l.total, 0);
+            const applyGst = document.getElementById('posApplyGst').checked;
+            const gstAmount = applyGst ? subtotal * 0.18 : 0;
+            const grandTotal = subtotal + gstAmount;
+            const paidAmount = parseFloat(document.getElementById('posPaidAmount').value) || 0;
+            const balanceDue = Math.max(0, grandTotal - paidAmount);
+
+            const invoiceNo = document.getElementById('posInvoiceNo').innerText;
+
+            const billRecord = {
+                invoiceNo: invoiceNo,
+                date: document.getElementById('posInvoiceDate').value || getTodayDateString(),
+                customerName: customerName,
+                customerPhone: document.getElementById('posCustomerPhone').value || '',
+                customerType: document.getElementById('posCustomerType').value,
+                items: currentPosLines.map(l => {
+                    const prod = inventory.find(p => p.id === l.productId);
+                    return {
+                        productId: l.productId,
+                        name: prod ? prod.name : 'Item',
+                        qty: l.qty,
+                        rate: l.rate,
+                        disc: l.disc,
+                        total: l.total
+                    };
+                }),
+                subtotal: subtotal,
+                applyGst: applyGst,
+                gstAmount: gstAmount,
+                grandTotal: grandTotal,
+                paymentMode: document.getElementById('posPaymentMode').value,
+                paidAmount: paidAmount,
+                balanceDue: balanceDue,
+                notes: document.getElementById('posNotes').value || ''
+            };
+
+            // Deduct stock
+            billRecord.items.forEach(item => {
+                const prod = inventory.find(p => p.id === item.productId);
+                if (prod) {
+                    prod.stock = Math.max(0, prod.stock - item.qty);
+                }
+            });
+            saveInventory();
+
+            // Save sale
+            sales.unshift(billRecord);
+            saveSales();
+
+            showToast(`Sales Bill ${invoiceNo} saved successfully!`);
+
+            if (andPrint) {
+                previewInvoice(invoiceNo);
+            }
+
+            initPosForm();
+        }
+
+        // =========================================================================
+        // INVENTORY MANAGEMENT
+        // =========================================================================
+        function renderInventoryTable() {
+            const tbody = document.getElementById('inventoryTableBody');
+            tbody.innerHTML = '';
+
+            const query = (document.getElementById('inventorySearchInput').value || '').toLowerCase();
+            const filtered = inventory.filter(item => {
+                const matchCat = (activeInvCategory === 'All' || item.category === activeInvCategory);
+                const matchQuery = item.name.toLowerCase().includes(query) || (item.hsn && item.hsn.includes(query));
+                return matchCat && matchQuery;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">No products found matching filter.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+
+                const isLow = item.stock <= item.minStock;
+                const statusBadge = isLow 
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-black bg-rose-100 text-rose-700">Low Stock</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">In Stock</span>`;
+
+                const totalVal = item.stock * item.costPrice;
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4">
+                        <span class="font-bold text-slate-900 block">${item.name}</span>
+                        <span class="text-[10px] text-slate-400 mono">HSN: ${item.hsn || 'N/A'} • Unit: ${item.unit}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">${item.category}</span>
+                    </td>
+                    <td class="py-3 px-4 font-black mono text-slate-900">${item.stock} ${item.unit}</td>
+                    <td class="py-3 px-4 mono text-slate-500">${formatINR(item.costPrice)}</td>
+                    <td class="py-3 px-4 mono font-bold text-teal-700">${formatINR(item.sellPrice)}</td>
+                    <td class="py-3 px-4 mono font-semibold text-slate-800">${formatINR(totalVal)}</td>
+                    <td class="py-3 px-4">${statusBadge}</td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="quickAddStock('${item.id}')" class="px-2 py-1 bg-slate-100 hover:bg-teal-50 text-teal-700 rounded font-bold text-[11px] mr-1" title="Add Stock">+ Stock</button>
+                        <button onclick="deleteProduct('${item.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        }
+
+        function filterInventoryCategory(cat) {
+            activeInvCategory = cat;
+            document.querySelectorAll('.inv-filter').forEach(btn => {
+                if (btn.innerText === cat || (cat === 'All' && btn.innerText === 'All Items')) {
+                    btn.className = 'inv-filter active-inv-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition';
+                } else {
+                    btn.className = 'inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
+                }
+            });
+            renderInventoryTable();
+        }
+
+        function filterInventory() {
+            renderInventoryTable();
+        }
+
+        function quickAddStock(productId) {
+            const item = inventory.find(p => p.id === productId);
+            if (!item) return;
+            const added = prompt(`Add incoming stock quantity for "${item.name}":`, "10");
+            if (added && !isNaN(added)) {
+                item.stock += parseInt(added);
+                saveInventory();
+                renderInventoryTable();
+                showToast(`Updated ${item.name} stock (+${added})`);
+            }
+        }
+
+        function deleteProduct(productId) {
+            if (confirm("Are you sure you want to delete this product from inventory?")) {
+                inventory = inventory.filter(p => p.id !== productId);
+                saveInventory();
+                renderInventoryTable();
+                showToast("Product deleted from stock.");
+            }
+        }
+
+        function openAddStockModal() {
+            document.getElementById('addStockModal').classList.remove('hidden');
+        }
+        function closeAddStockModal() {
+            document.getElementById('addStockModal').classList.add('hidden');
+        }
+
+        function handleSaveProduct(e) {
+            e.preventDefault();
+            const newProd = {
+                id: 'p_' + Date.now(),
+                name: document.getElementById('prodName').value,
+                category: document.getElementById('prodCategory').value,
+                unit: document.getElementById('prodUnit').value,
+                stock: parseInt(document.getElementById('prodStock').value) || 0,
+                costPrice: parseFloat(document.getElementById('prodCost').value) || 0,
+                sellPrice: parseFloat(document.getElementById('prodPrice').value) || 0,
+                minStock: parseInt(document.getElementById('prodMinStock').value) || 10,
+                hsn: document.getElementById('prodHsn').value || '3917'
+            };
+
+            inventory.unshift(newProd);
+            saveInventory();
+            closeAddStockModal();
+            renderInventoryTable();
+            showToast(`Product "${newProd.name}" added to inventory!`);
+        }
+
+        // =========================================================================
+        // KHATA & CREDIT LEDGER
+        // =========================================================================
+        function computeKhataBalances() {
+            const map = {}; // customerName -> { name, phone, type, totalBilled, totalPaid, balance, invoices: [] }
+
+            sales.forEach(s => {
+                const key = s.customerName.trim();
+                if (!map[key]) {
+                    map[key] = {
+                        name: key,
+                        phone: s.customerPhone,
+                        type: s.customerType,
+                        totalBilled: 0,
+                        totalPaid: 0,
+                        balance: 0,
+                        invoices: []
+                    };
+                }
+                map[key].totalBilled += s.grandTotal;
+                map[key].totalPaid += s.paidAmount;
+                map[key].invoices.push(s);
+            });
+
+            // Factor in additional khata payments
+            khataPayments.forEach(p => {
+                const key = p.customerName.trim();
+                if (map[key]) {
+                    map[key].totalPaid += p.amount;
+                }
+            });
+
+            Object.values(map).forEach(acc => {
+                acc.balance = Math.max(0, acc.totalBilled - acc.totalPaid);
+            });
+
+            return map;
+        }
+
+        function renderKhataAccounts() {
+            const grid = document.getElementById('khataAccountsGrid');
+            grid.innerHTML = '';
+
+            const khataMap = computeKhataBalances();
+            const query = (document.getElementById('khataSearchInput').value || '').toLowerCase();
+
+            const accounts = Object.values(khataMap).filter(acc => {
+                return acc.name.toLowerCase().includes(query) || (acc.phone && acc.phone.includes(query));
+            });
+
+            let totalReceivables = 0;
+            accounts.forEach(a => totalReceivables += a.balance);
+            document.getElementById('khataTotalReceivables').innerText = formatINR(totalReceivables);
+            document.getElementById('khataFilteredCount').innerText = accounts.length;
+
+            if (accounts.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-slate-400">
+                        <i data-lucide="book-check" class="w-12 h-12 mx-auto mb-2 text-slate-300"></i>
+                        <p class="text-sm font-bold text-slate-700">No active Khata ledger accounts found.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            accounts.forEach(acc => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition space-y-4 flex flex-col justify-between";
+
+                const isDue = acc.balance > 0;
+
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${acc.type}</span>
+                                <h4 class="text-base font-extrabold text-slate-900 mt-0.5">${acc.name}</h4>
+                                <span class="text-xs text-slate-500 font-semibold mono">${acc.phone ? '+91 ' + acc.phone : 'No Phone Recorded'}</span>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${isDue ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
+                                ${isDue ? 'Payment Pending' : 'Clear Account'}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-2xl text-xs">
+                            <div>
+                                <span class="text-[10px] text-slate-400 block">Total Purchases</span>
+                                <span class="font-bold text-slate-800 mono">${formatINR(acc.totalBilled)}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 block">Total Paid</span>
+                                <span class="font-bold text-emerald-700 mono">${formatINR(acc.totalPaid)}</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-amber-50/80 border border-amber-200 rounded-2xl flex items-center justify-between">
+                            <span class="text-xs font-bold text-amber-900">Current Balance Due:</span>
+                            <span class="text-base font-black text-amber-700 mono">${formatINR(acc.balance)}</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <button onclick="sendWhatsAppReminder('${acc.name}', '${acc.phone}', ${acc.balance})" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5"></i> WhatsApp
+                        </button>
+                        <button onclick="openKhataPaymentModal('${acc.name}', ${acc.balance})" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold transition flex items-center gap-1 shadow-xs">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Receive Money
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function filterKhata() {
+            renderKhataAccounts();
+        }
+
+        function openKhataPaymentModal(customerName, currentDue) {
+            activeKhataCustomer = customerName;
+            document.getElementById('khataPayCustName').innerText = customerName;
+            document.getElementById('khataPayCurrentDue').innerText = formatINR(currentDue);
+            document.getElementById('khataPayAmount').value = currentDue > 0 ? currentDue : '';
+            document.getElementById('khataPayNote').value = '';
+            document.getElementById('khataPaymentModal').classList.remove('hidden');
+        }
+
+        function closeKhataPaymentModal() {
+            document.getElementById('khataPaymentModal').classList.add('hidden');
+        }
+
+        function submitKhataPayment() {
+            const amount = parseFloat(document.getElementById('khataPayAmount').value) || 0;
+            if (amount <= 0) {
+                showToast("Please enter a valid received amount!", "error");
+                return;
+            }
+
+            khataPayments.push({
+                id: 'pay_' + Date.now(),
+                customerName: activeKhataCustomer,
+                date: getTodayDateString(),
+                amount: amount,
+                method: document.getElementById('khataPayMethod').value,
+                note: document.getElementById('khataPayNote').value || ''
+            });
+
+            saveKhataPayments();
+            closeKhataPaymentModal();
+            renderKhataAccounts();
+            showToast(`Recorded receipt of ${formatINR(amount)} from ${activeKhataCustomer}!`);
+        }
+
+        function sendWhatsAppReminder(name, phone, balance) {
+            if (!phone) {
+                showToast("No phone number saved for this contractor.", "error");
+                return;
+            }
+            const cleanPhone = phone.replace(/\D/g, '');
+            const msg = encodeURIComponent(`Dear ${name},\n\nGreetings from AQUAPRO Fittings & Pipes. This is a gentle reminder that your pending balance is ${formatINR(balance)}.\n\nKindly arrange the payment via UPI / Bank transfer.\n\nThank you!`);
+            window.open(`https://wa.me/91${cleanPhone}?text=${msg}`, '_blank');
+        }
+
+        // =========================================================================
+        // SALES JOURNAL & REPORTS
+        // =========================================================================
+        function filterReportDate(filter) {
+            activeReportFilter = filter;
+            document.querySelectorAll('.rep-date-filter').forEach(btn => {
+                if (btn.id === 'rep-' + filter) {
+                    btn.className = 'rep-date-filter active-rep-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition';
+                } else {
+                    btn.className = 'rep-date-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
+                }
+            });
+            renderReportsTable();
+        }
+
+        function renderReportsTable() {
+            const tbody = document.getElementById('reportsTableBody');
+            tbody.innerHTML = '';
+
+            const todayStr = getTodayDateString();
+            const filteredSales = sales.filter(s => {
+                if (activeReportFilter === 'today') return s.date === todayStr;
+                if (activeReportFilter === 'yesterday') {
+                    const y = new Date(); y.setDate(y.getDate() - 1);
+                    return s.date === y.toISOString().split('T')[0];
+                }
+                if (activeReportFilter === '7days') {
+                    const past = new Date(); past.setDate(past.getDate() - 7);
+                    return new Date(s.date) >= past;
+                }
+                if (activeReportFilter === 'month') {
+                    return s.date.startsWith(todayStr.substr(0, 7));
+                }
+                return true;
+            });
+
+            const totalPeriod = filteredSales.reduce((sum, s) => sum + s.grandTotal, 0);
+            document.getElementById('reportPeriodRevenue').innerText = formatINR(totalPeriod);
+
+            if (filteredSales.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">No transactions found for the selected period.</td></tr>`;
+                return;
+            }
+
+            filteredSales.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+
+                const isCredit = s.balanceDue > 0;
+                const statusBadge = isCredit 
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Due: ${formatINR(s.balanceDue)}</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">Paid</span>`;
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-900 mono">${s.invoiceNo}</td>
+                    <td class="py-3 px-4 text-slate-600">${s.date}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-900">${s.customerName}</td>
+                    <td class="py-3 px-4 text-slate-500">${s.customerType}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold">${s.paymentMode}</span></td>
+                    <td class="py-3 px-4 font-bold text-slate-900 mono">${formatINR(s.grandTotal)}</td>
+                    <td class="py-3 px-4">${statusBadge}</td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="previewInvoice('${s.invoiceNo}')" class="px-2.5 py-1 bg-slate-100 hover:bg-teal-50 text-teal-700 rounded font-bold text-xs" title="Print Invoice">Print</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportSalesCSV() {
+            let csv = "InvoiceNo,Date,CustomerName,Phone,Category,PaymentMode,Subtotal,GST,GrandTotal,PaidAmount,BalanceDue\n";
+            sales.forEach(s => {
+                csv += `"${s.invoiceNo}","${s.date}","${s.customerName}","${s.customerPhone}","${s.customerType}","${s.paymentMode}",${s.subtotal},${s.gstAmount},${s.grandTotal},${s.paidAmount},${s.balanceDue}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `AQUAPRO_Sales_Journal_${getTodayDateString()}.csv`;
+            link.click();
+            showToast("Sales journal exported to CSV!");
+        }
+
+        // =========================================================================
+        // PRINT INVOICE MODAL
+        // =========================================================================
+        function previewInvoice(invoiceNo) {
+            const bill = sales.find(s => s.invoiceNo === invoiceNo);
+            if (!bill) return;
+
+            document.getElementById('invPrintNo').innerText = bill.invoiceNo;
+            document.getElementById('invPrintDate').innerText = bill.date;
+            document.getElementById('invPrintCustName').innerText = bill.customerName;
+            document.getElementById('invPrintCustPhone').innerText = bill.customerPhone ? '+91 ' + bill.customerPhone : '';
+            document.getElementById('invPrintCustType').innerText = bill.customerType;
+            document.getElementById('invPrintPayMode').innerText = bill.paymentMode;
+            document.getElementById('invPrintNotes').innerText = bill.notes ? 'Note: ' + bill.notes : '';
+
+            const tbody = document.getElementById('invPrintItemsBody');
+            tbody.innerHTML = '';
+
+            bill.items.forEach((it, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-2">${idx + 1}</td>
+                    <td class="py-2 font-bold">${it.name}</td>
+                    <td class="py-2 text-center mono">${it.qty}</td>
+                    <td class="py-2 text-right mono">${formatINR(it.rate)}</td>
+                    <td class="py-2 text-right mono">${it.disc}%</td>
+                    <td class="py-2 text-right font-bold mono">${formatINR(it.total)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('invPrintSubtotal').innerText = formatINR(bill.subtotal);
+            if (bill.applyGst) {
+                document.getElementById('invPrintGstRow').classList.remove('hidden');
+                document.getElementById('invPrintGst').innerText = formatINR(bill.gstAmount);
+            } else {
+                document.getElementById('invPrintGstRow').classList.add('hidden');
+            }
+            document.getElementById('invPrintGrandTotal').innerText = formatINR(bill.grandTotal);
+            document.getElementById('invPrintPaid').innerText = formatINR(bill.paidAmount);
+
+            if (bill.balanceDue > 0) {
+                document.getElementById('invPrintDueRow').classList.remove('hidden');
+                document.getElementById('invPrintDue').innerText = formatINR(bill.balanceDue);
+            } else {
+                document.getElementById('invPrintDueRow').classList.add('hidden');
+            }
+
+            document.getElementById('invoiceModal').classList.remove('hidden');
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoiceModal').classList.add('hidden');
+        }
+
+        // =========================================================================
+        // BACKUP & RESTORE
+        // =========================================================================
+        function exportFullBackupJSON() {
+            const backup = {
+                timestamp: new Date().toISOString(),
+                inventory: inventory,
+                sales: sales,
+                khataPayments: khataPayments
+            };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `AQUAPRO_Backup_${getTodayDateString()}.json`;
+            link.click();
+            showToast("Complete database backup exported!");
+        }
+
+        function resetToDemoData() {
+            if (confirm("Reset to factory demo database? Current local data will be replaced.")) {
+                inventory = [...INITIAL_INVENTORY];
+                sales = [...INITIAL_SALES];
+                khataPayments = [];
+                saveInventory();
+                saveSales();
+                saveKhataPayments();
+                renderDashboard();
+                showToast("Reset to demo data complete!");
+            }
+        }
+
+        // Window load
+        window.addEventListener('DOMContentLoaded', () => {
+            initData();
+            renderDashboard();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
