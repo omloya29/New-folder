@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AQUAPRO | CP Fittings & CPVC Pipes Sales & Inventory Management</title>
-    <!-- Tailwind CSS -->
+    <title>KARNI BUILTMART | Cement, Building Materials, CP Fittings & CPVC Pipes ERP</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -21,11 +21,20 @@
                             900: '#042f2e',
                             950: '#021e1d'
                         },
-                        pipe: {
-                            50: '#eff6ff',
-                            500: '#3b82f6',
-                            700: '#1d4ed8',
-                            900: '#1e3a8a'
+                        cement: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a'
+                        },
+                        gold: {
+                            50: '#fffbeb',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309'
                         }
                     },
                     fontFamily: {
@@ -39,7 +48,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Lucide Icons -->
@@ -52,21 +61,20 @@
             font-family: 'JetBrains Mono', monospace;
         }
         .gradient-nav {
-            background: linear-gradient(135deg, #042f2e 0%, #0f172a 100%);
+            background: linear-gradient(135deg, #091e2b 0%, #042f2e 50%, #0f172a 100%);
         }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
+        .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
-        ::-webkit-scrollbar-track {
+        .custom-scrollbar::-webkit-scrollbar-track {
             background: #f1f5f9;
         }
-        ::-webkit-scrollbar-thumb {
+        .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 4px;
         }
-        ::-webkit-scrollbar-thumb:hover {
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
         @media print {
@@ -92,28 +100,137 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 selection:bg-teal-600 selection:text-white antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-slate-50 text-slate-900 selection:bg-teal-600 selection:text-white antialiased min-h-screen flex flex-col justify-between custom-scrollbar">
 
     <!-- Toast Notification Container -->
-    <div id="toastContainer" class="fixed top-4 right-4 z-[120] flex flex-col gap-2 pointer-events-none"></div>
+    <div id="toastContainer" class="fixed top-4 right-4 z-[150] flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- Top Business Header Bar -->
+    <!-- ========================================================================= -->
+    <!-- AUTHENTICATION OVERLAY / LOGIN MODAL                                      -->
+    <!-- ========================================================================= -->
+    <div id="authScreen" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <!-- Auth Header -->
+            <div class="bg-gradient-to-br from-slate-950 via-teal-950 to-slate-900 p-6 text-white text-center relative overflow-hidden">
+                <div class="absolute -right-8 -top-8 w-28 h-28 bg-teal-500/20 rounded-full blur-xl pointer-events-none"></div>
+                <div class="inline-flex p-3 rounded-2xl bg-teal-500/20 border border-teal-500/30 text-teal-300 mb-3 shadow-lg shadow-teal-500/10">
+                    <i data-lucide="building-2" class="w-8 h-8 text-teal-400"></i>
+                </div>
+                <h2 class="text-2xl font-black tracking-tight">KARNI BUILTMART</h2>
+                <p class="text-xs text-teal-300 font-medium mt-0.5">Hyderabad • Cement, Building Materials & CPVC ERP</p>
+                <div class="inline-block mt-2 px-3 py-0.5 rounded-full bg-teal-900/80 border border-teal-700/60 text-[10px] font-bold text-teal-300 uppercase tracking-wider">
+                    Authorized Agency & Billing Terminal
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">1-Click Fast Login (Select Role):</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="quickLoginRole('admin')" class="p-2.5 rounded-xl border border-amber-500/40 bg-amber-50 hover:bg-amber-100 text-amber-950 text-center transition flex flex-col items-center gap-1 group">
+                            <i data-lucide="shield-check" class="w-4 h-4 text-amber-600 group-hover:scale-110 transition"></i>
+                            <span class="text-[11px] font-black">Sarda (Owner)</span>
+                            <span class="text-[9px] text-amber-700 font-bold">Full Access</span>
+                        </button>
+                        <button type="button" onclick="quickLoginRole('cashier')" class="p-2.5 rounded-xl border border-cyan-500/30 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 text-center transition flex flex-col items-center gap-1 group">
+                            <i data-lucide="receipt" class="w-4 h-4 text-cyan-600 group-hover:scale-110 transition"></i>
+                            <span class="text-[11px] font-bold">Cashier</span>
+                            <span class="text-[9px] text-cyan-700 font-medium">POS Billing</span>
+                        </button>
+                        <button type="button" onclick="quickLoginRole('stock')" class="p-2.5 rounded-xl border border-teal-500/30 bg-teal-50 hover:bg-teal-100 text-teal-900 text-center transition flex flex-col items-center gap-1 group">
+                            <i data-lucide="boxes" class="w-4 h-4 text-teal-600 group-hover:scale-110 transition"></i>
+                            <span class="text-[11px] font-bold">Godown Mgr</span>
+                            <span class="text-[9px] text-teal-700 font-medium">Stock & Yard</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="relative flex py-1 items-center">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink mx-3 text-[10px] font-bold uppercase text-slate-400">Or enter credentials</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <form onsubmit="handleManualLogin(event)" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username or Staff ID</label>
+                        <div class="relative">
+                            <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                            <input type="text" id="loginUsername" placeholder="e.g. admin or cashier" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password or Quick PIN</label>
+                        <div class="relative">
+                            <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                            <input type="password" id="loginPassword" placeholder="••••••••" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none mono" required>
+                        </div>
+                    </div>
+
+                    <div id="loginErrorMsg" class="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 p-2 rounded-xl text-center hidden">
+                        Invalid credentials. Please check username or PIN.
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-md shadow-slate-900/10">
+                        <i data-lucide="log-in" class="w-4 h-4 text-teal-400"></i> Secure Sign In
+                    </button>
+                </form>
+            </div>
+            
+            <div class="p-3 bg-slate-50 border-t border-slate-100 text-center text-[11px] text-slate-400">
+                Default Owner: <span class="font-bold text-slate-700">admin / admin123</span> (PIN: 1234)
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- SCREEN LOCK OVERLAY                                                       -->
+    <!-- ========================================================================= -->
+    <div id="lockScreen" class="fixed inset-0 bg-slate-950/95 backdrop-blur-lg z-[190] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-sm w-full rounded-3xl shadow-2xl border border-slate-200 p-6 text-center space-y-4">
+            <div class="w-16 h-16 bg-amber-50 text-amber-600 border border-amber-200 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+                <i data-lucide="lock" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-black text-slate-900">Billing Counter Locked</h3>
+                <p class="text-xs text-slate-500 mt-0.5">Enter PIN to resume billing session</p>
+                <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-xs font-bold text-slate-800">
+                    <span id="lockedUserName">Sarda</span>
+                    <span id="lockedUserRole" class="text-[9px] uppercase px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 font-black">Owner</span>
+                </div>
+            </div>
+
+            <form onsubmit="handleUnlockScreen(event)" class="space-y-3">
+                <input type="password" id="unlockPinInput" placeholder="Enter Staff PIN (e.g. 1234)" maxlength="8" class="w-full text-center tracking-widest text-lg font-black py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none mono" required autofocus>
+                <div id="unlockErrorMsg" class="text-xs font-bold text-rose-600 hidden">Incorrect PIN. Try again.</div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="performLogout()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl">Logout</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs rounded-xl shadow-sm">Unlock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TOP BUSINESS HEADER BAR                                                   -->
+    <!-- ========================================================================= -->
     <header class="gradient-nav text-white sticky top-0 z-40 shadow-xl border-b border-teal-900/60 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
             
             <!-- Store Identity -->
             <div class="flex items-center space-x-3.5 cursor-pointer" onclick="switchView('dashboard')">
-                <div class="bg-gradient-to-tr from-teal-400 to-cyan-400 p-2.5 rounded-xl text-slate-950 font-black tracking-wider text-base shadow-md shadow-teal-500/20 flex items-center justify-center">
-                    <i data-lucide="droplet" class="w-5 h-5 fill-slate-950"></i>
+                <div class="bg-gradient-to-tr from-amber-400 via-teal-400 to-cyan-400 p-2.5 rounded-xl text-slate-950 font-black tracking-wider text-base shadow-md shadow-teal-500/20 flex items-center justify-center">
+                    <i data-lucide="building-2" class="w-5 h-5 fill-slate-950 text-slate-950"></i>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-black tracking-tight text-white flex items-center gap-1.5">
-                            AQUAPRO <span class="text-teal-400 font-light text-sm">ERP</span>
+                            KARNI BUILTMART <span class="text-amber-400 font-bold text-xs px-2 py-0.5 rounded bg-amber-950/80 border border-amber-700/60">HYDERABAD</span>
                         </h1>
-                        <span class="text-[9px] font-bold uppercase tracking-wider bg-teal-950 text-teal-300 border border-teal-800 px-1.5 py-0.5 rounded">CP & CPVC Suite</span>
+                        <span class="text-[10px] text-slate-400 font-medium hidden md:inline">• Owner: <strong class="text-white">Sarda</strong></span>
                     </div>
-                    <p class="text-[11px] text-slate-400 font-medium">Daily Sales, Live Inventory & Contractor Khata Ledger</p>
+                    <p class="text-[11px] text-slate-300 font-medium">UltraTech, Maha, Nagarjuna, KCP Cement, CPVC Pipes & Contractor Khata</p>
                 </div>
             </div>
 
@@ -126,28 +243,46 @@
                     <i data-lucide="receipt" class="w-4 h-4 text-cyan-400"></i> New Sale (POS)
                 </button>
                 <button onclick="switchView('inventory')" id="nav-inventory" class="nav-btn px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="boxes" class="w-4 h-4 text-blue-400"></i> Stock Inventory
+                    <i data-lucide="boxes" class="w-4 h-4 text-amber-400"></i> Cement & Stock
                     <span id="lowStockBadge" class="hidden bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">0</span>
                 </button>
                 <button onclick="switchView('khata')" id="nav-khata" class="nav-btn px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="book-open" class="w-4 h-4 text-amber-400"></i> Khata / Credit
+                    <i data-lucide="book-open" class="w-4 h-4 text-amber-300"></i> Contractor Khata
                 </button>
                 <button onclick="switchView('reports')" id="nav-reports" class="nav-btn px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="bar-chart-3" class="w-4 h-4 text-indigo-400"></i> Sales Journal
                 </button>
             </nav>
 
-            <!-- Quick Action: Quick New Bill -->
-            <div class="hidden lg:flex items-center space-x-2">
-                <button onclick="switchView('pos')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-slate-950 font-black text-xs transition shadow-md shadow-teal-500/20 flex items-center gap-1.5">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
-                    <span>+ Quick Sale</span>
+            <!-- User Auth & Action Bar -->
+            <div class="flex items-center space-x-2">
+                <!-- User Profile Badge -->
+                <div class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-2.5 py-1.5 rounded-xl">
+                    <div id="headerUserAvatar" class="w-7 h-7 rounded-lg bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center">
+                        S
+                    </div>
+                    <div class="text-left hidden sm:block">
+                        <div id="headerUserName" class="text-[11px] font-bold text-white leading-tight">Sarda</div>
+                        <div id="headerUserRole" class="text-[9px] text-amber-400 font-semibold uppercase leading-tight">Owner</div>
+                    </div>
+                </div>
+
+                <!-- Quick Lock Screen Button -->
+                <button onclick="lockScreenNow()" title="Lock Screen (Counter Lock)" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-400 transition">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                </button>
+
+                <!-- Logout Button -->
+                <button onclick="performLogout()" title="Sign Out" class="p-2 rounded-xl bg-slate-800 hover:bg-rose-950 text-slate-300 hover:text-rose-400 transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Container -->
+    <!-- ========================================================================= -->
+    <!-- MAIN CONTENT CONTAINER                                                    -->
+    <!-- ========================================================================= -->
     <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full space-y-6">
 
         <!-- ========================================================================= -->
@@ -170,12 +305,12 @@
                         <span id="kpiTodaySales" class="text-2xl sm:text-3xl font-black text-slate-900 mono">₹0</span>
                     </div>
                     <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
-                        <span>Bills Created Today:</span>
+                        <span>Billed Today:</span>
                         <span id="kpiTodayBillsCount" class="font-bold text-slate-800 mono">0 bills</span>
                     </div>
                 </div>
 
-                <!-- Today's Cash in Hand / UPI -->
+                <!-- Today's Collections -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Today's Collections</span>
@@ -195,7 +330,7 @@
                 <!-- Total Outstanding Khata Dues -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Pending Khata</span>
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Builder / Contractor Khata</span>
                         <div class="p-2 rounded-xl bg-amber-50 text-amber-600">
                             <i data-lucide="book-marked" class="w-4 h-4"></i>
                         </div>
@@ -204,7 +339,7 @@
                         <span id="kpiTotalKhataDue" class="text-2xl sm:text-3xl font-black text-amber-600 mono">₹0</span>
                     </div>
                     <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
-                        <span>Contractors/Plumbers:</span>
+                        <span>Active Accounts:</span>
                         <span id="kpiKhataCustomersCount" class="font-bold text-slate-800">0 accounts</span>
                     </div>
                 </div>
@@ -212,7 +347,7 @@
                 <!-- Total Stock Valuation -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Stock Valuation</span>
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Godown Stock Valuation</span>
                         <div class="p-2 rounded-xl bg-blue-50 text-blue-600">
                             <i data-lucide="boxes" class="w-4 h-4"></i>
                         </div>
@@ -221,7 +356,7 @@
                         <span id="kpiStockValuation" class="text-2xl sm:text-3xl font-black text-slate-900 mono">₹0</span>
                     </div>
                     <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
-                        <span>Total Items in Stock:</span>
+                        <span>Total Units / Bags:</span>
                         <span id="kpiStockItemsCount" class="font-bold text-slate-800 mono">0 items</span>
                     </div>
                 </div>
@@ -230,15 +365,15 @@
 
             <!-- Charts Row -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- 7-Day Sales Trend Bar/Line -->
+                <!-- 7-Day Sales Trend -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
                     <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
                         <div>
                             <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="trending-up" class="w-4 h-4 text-teal-600"></i>
-                                7-Day Sales Velocity (₹)
+                                KARNI BUILTMART - Daily Sales Velocity (₹)
                             </h3>
-                            <p class="text-xs text-slate-400">Daily billing performance overview</p>
+                            <p class="text-xs text-slate-400">Cement bags dispatch, pipes & fittings revenue</p>
                         </div>
                         <button onclick="switchView('reports')" class="text-xs font-bold text-teal-600 hover:text-teal-700">View Journal &rarr;</button>
                     </div>
@@ -251,21 +386,21 @@
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                     <div class="mb-4 pb-3 border-b border-slate-100">
                         <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
-                            <i data-lucide="pie-chart" class="w-4 h-4 text-blue-600"></i>
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-amber-600"></i>
                             Sales by Category
                         </h3>
-                        <p class="text-xs text-slate-400">CP Fittings vs CPVC Pipes & Brass</p>
+                        <p class="text-xs text-slate-400">Cement vs Putty vs Pipes & Valves</p>
                     </div>
                     <div class="relative w-full h-52 flex items-center justify-center">
                         <canvas id="categoryShareChart"></canvas>
                     </div>
                     <div class="mt-3 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-[11px] text-center">
                         <div class="bg-slate-50 p-1.5 rounded-lg">
-                            <span class="text-slate-400 block text-[10px]">CP Fittings</span>
+                            <span class="text-slate-400 block text-[10px]">Cement Bags</span>
                             <span id="statCpShare" class="font-bold text-slate-800 mono">0%</span>
                         </div>
                         <div class="bg-slate-50 p-1.5 rounded-lg">
-                            <span class="text-slate-400 block text-[10px]">CPVC Pipes</span>
+                            <span class="text-slate-400 block text-[10px]">Pipes & Fittings</span>
                             <span id="statCpvcShare" class="font-bold text-slate-800 mono">0%</span>
                         </div>
                     </div>
@@ -281,9 +416,9 @@
                         <div>
                             <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
                                 <i data-lucide="history" class="w-4 h-4 text-slate-600"></i>
-                                Today's & Recent Sales
+                                Today's & Recent Dispatches
                             </h3>
-                            <p class="text-xs text-slate-400">Latest customer orders and challans</p>
+                            <p class="text-xs text-slate-400">Site deliveries, retail invoices & contractor challans</p>
                         </div>
                         <button onclick="switchView('pos')" class="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-700 text-xs font-bold transition flex items-center gap-1">
                             <i data-lucide="plus" class="w-3.5 h-3.5"></i> New Bill
@@ -294,8 +429,8 @@
                         <table class="w-full text-left text-xs">
                             <thead>
                                 <tr class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
-                                    <th class="py-2.5 px-3">Bill No / Date</th>
-                                    <th class="py-2.5 px-3">Customer / Contractor</th>
+                                    <th class="py-2.5 px-3">Bill / Date</th>
+                                    <th class="py-2.5 px-3">Customer / Contractor / Site</th>
                                     <th class="py-2.5 px-3">Items</th>
                                     <th class="py-2.5 px-3">Total Amount</th>
                                     <th class="py-2.5 px-3">Payment</th>
@@ -309,16 +444,16 @@
                     </div>
                 </div>
 
-                <!-- Low Stock & Reorder Box (1 col) -->
+                <!-- Low Stock Alerts -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center pb-3 border-b border-slate-100">
                             <div>
                                 <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
                                     <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i>
-                                    Stock Reorder Alerts
+                                    Cement & Stock Reorder Alerts
                                 </h3>
-                                <p class="text-xs text-slate-400">Items below minimum reorder level</p>
+                                <p class="text-xs text-slate-400">Items below minimum godown buffer</p>
                             </div>
                             <button onclick="switchView('inventory')" class="text-xs font-bold text-teal-600 hover:text-teal-700">Stock &rarr;</button>
                         </div>
@@ -329,8 +464,8 @@
                     </div>
 
                     <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 flex items-center justify-between">
-                        <span>Need to add incoming shipment?</span>
-                        <button onclick="openAddStockModal()" class="font-bold text-teal-700 hover:underline">+ Add Stock</button>
+                        <span>Incoming truck / cement trailer?</span>
+                        <button onclick="openRestockModal()" class="font-bold text-teal-700 hover:underline">+ Inward Stock</button>
                     </div>
                 </div>
 
@@ -343,162 +478,209 @@
         <!-- ========================================================================= -->
         <section id="view-pos" class="app-view hidden space-y-6">
             
-            <div class="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-                
-                <!-- Bill Top Header -->
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="p-2 rounded-xl bg-teal-50 text-teal-700">
-                                <i data-lucide="receipt" class="w-5 h-5"></i>
-                            </span>
-                            <div>
-                                <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">New Sales Bill / Invoice</h2>
-                                <p class="text-xs text-slate-500">Generate retail cash memo, tax invoice, or contractor credit slip</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs font-bold text-slate-500">Invoice No:</span>
-                        <span id="posInvoiceNo" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-900 font-black mono text-xs border border-slate-200">
-                            INV-2026-0001
-                        </span>
-                    </div>
-                </div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                <!-- Customer Details Row -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50/70 p-5 rounded-2xl border border-slate-200">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Customer / Plumber Name *</label>
-                        <input type="text" id="posCustomerName" placeholder="e.g. Ramesh Plumber / Rajesh Kumar" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Mobile / WhatsApp Number</label>
-                        <input type="tel" id="posCustomerPhone" placeholder="e.g. 9876543210" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none mono">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Customer Category</label>
-                        <select id="posCustomerType" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-teal-500 focus:outline-none">
-                            <option value="Plumber / Contractor" selected>Plumber / Contractor</option>
-                            <option value="Retail Customer">Retail Walk-in Customer</option>
-                            <option value="Builder / Site Project">Builder / Site Project</option>
-                            <option value="Hardware Dealer / Sub-dealer">Hardware Dealer</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Invoice Date</label>
-                        <input type="date" id="posInvoiceDate" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none mono">
-                    </div>
-                </div>
-
-                <!-- Line Items Table -->
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Bill Item Lines</h3>
-                        <button type="button" onclick="addPosLineItem()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
-                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Item Line
-                        </button>
-                    </div>
-
-                    <div class="overflow-x-auto border border-slate-200 rounded-2xl">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="bg-slate-100 text-slate-600 uppercase font-bold border-b border-slate-200">
-                                    <th class="py-3 px-3 w-10">#</th>
-                                    <th class="py-3 px-3 min-w-[220px]">Item Description (CP / CPVC)</th>
-                                    <th class="py-3 px-3 w-28">Available</th>
-                                    <th class="py-3 px-3 w-28">Qty</th>
-                                    <th class="py-3 px-3 w-28">Rate (₹)</th>
-                                    <th class="py-3 px-3 w-24">Disc %</th>
-                                    <th class="py-3 px-3 w-32 text-right">Total (₹)</th>
-                                    <th class="py-3 px-3 w-12 text-center"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="posLineItemsBody" class="divide-y divide-slate-100">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Calculations and Payment Breakdown -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-4 border-t border-slate-100">
+                <!-- Left Column: POS Bill Form -->
+                <div class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
                     
-                    <!-- Left: Notes & Tax Options -->
-                    <div class="lg:col-span-6 space-y-4">
+                    <!-- Bill Top Header -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Site Delivery Note / Notes</label>
-                            <textarea id="posNotes" rows="2" placeholder="e.g. Delivered at Sky Heights Flat 402, Site supervisor Mohan" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
-                        </div>
-
-                        <!-- Tax Toggle -->
-                        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                            <div>
-                                <span class="text-xs font-bold text-slate-800 block">Apply GST (18% Statutory)</span>
-                                <span class="text-[10px] text-slate-400">Applicable for formal Tax Invoices</span>
+                            <div class="flex items-center gap-2">
+                                <span class="p-2 rounded-xl bg-amber-50 text-amber-700">
+                                    <i data-lucide="receipt" class="w-5 h-5"></i>
+                                </span>
+                                <div>
+                                    <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">New Sales Bill / Delivery Challan</h2>
+                                    <p class="text-xs text-slate-500">KARNI BUILTMART • Retail Cash Memo, GST Tax Invoice, or Contractor Slip</p>
+                                </div>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" id="posApplyGst" onchange="calculatePosTotals()" class="sr-only peer">
-                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
-                            </label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-slate-500">Invoice:</span>
+                            <span id="posInvoiceNo" class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-900 font-black mono text-xs border border-slate-200">
+                                KB-2026-0001
+                            </span>
                         </div>
                     </div>
 
-                    <!-- Right: Payment Computation Box -->
-                    <div class="lg:col-span-6 bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
+                    <!-- Customer Details Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50/80 p-4 rounded-2xl border border-slate-200">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Customer / Contractor / Builder *</label>
+                            <input type="text" id="posCustomerName" placeholder="e.g. Sri Rama Constructions / GVK Project Site" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Mobile / WhatsApp Number</label>
+                            <input type="tel" id="posCustomerPhone" placeholder="e.g. 9849012345 (Hyderabad)" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none mono">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Customer Category</label>
+                            <select id="posCustomerType" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                                <option value="Civil Contractor / Builder" selected>Civil Contractor / Builder</option>
+                                <option value="Plumber / Sanitary Contractor">Plumber / Sanitary Contractor</option>
+                                <option value="Individual Home Builder">Individual Home Builder (Site)</option>
+                                <option value="Retail Walk-in">Retail Walk-in Customer</option>
+                                <option value="Hardware Sub-Dealer">Hardware Sub-Dealer</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Invoice Date</label>
+                            <input type="date" id="posInvoiceDate" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:ring-2 focus:ring-teal-500 focus:outline-none mono">
+                        </div>
+                    </div>
+
+                    <!-- Line Items Table -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Bill Item Lines (<span id="posItemsCountBadge">1</span>)</h3>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="openAddStockModal()" class="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-700 font-bold text-xs rounded-xl transition flex items-center gap-1">
+                                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> + Create New Item
+                                </button>
+                                <button type="button" onclick="addPosLineItem()" class="px-3 py-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition flex items-center gap-1">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Row
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-600 uppercase font-bold border-b border-slate-200">
+                                        <th class="py-2.5 px-3 w-10">#</th>
+                                        <th class="py-2.5 px-3 min-w-[200px]">Item Description (Cement / Pipes)</th>
+                                        <th class="py-2.5 px-3 w-20">Stock</th>
+                                        <th class="py-2.5 px-3 w-24">Qty</th>
+                                        <th class="py-2.5 px-3 w-24">Rate (₹)</th>
+                                        <th class="py-2.5 px-3 w-16">Disc%</th>
+                                        <th class="py-2.5 px-3 w-24 text-right">Total (₹)</th>
+                                        <th class="py-2.5 px-3 w-10 text-center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="posLineItemsBody" class="divide-y divide-slate-100">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Calculations and Payment Breakdown -->
+                    <div class="pt-4 border-t border-slate-100 space-y-4">
                         
-                        <div class="space-y-2 text-xs text-slate-600">
-                            <div class="flex justify-between font-semibold">
-                                <span>Subtotal</span>
-                                <span id="posSubtotal" class="font-bold text-slate-900 mono">₹0</span>
-                            </div>
-                            <div id="posGstRow" class="flex justify-between font-semibold text-slate-700 hidden">
-                                <span>GST (18%)</span>
-                                <span id="posGstAmount" class="font-bold mono">₹0</span>
-                            </div>
-                            <div class="flex justify-between text-sm font-extrabold text-slate-900 pt-2 border-t border-slate-200">
-                                <span>Net Bill Amount</span>
-                                <span id="posGrandTotal" class="text-teal-700 mono text-lg">₹0</span>
-                            </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Site Delivery Address / Vehicle / Driver Note</label>
+                            <textarea id="posNotes" rows="2" placeholder="e.g. Delivered at Madhapur Site Plot 42, Vehicle TS 09 UB 4421, Driver Ramesh" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-teal-500 focus:outline-none"></textarea>
                         </div>
 
-                        <div class="pt-3 border-t border-slate-200 space-y-3">
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Payment Mode</label>
-                                    <select id="posPaymentMode" onchange="handlePaymentModeChange()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
-                                        <option value="Cash" selected>Cash Payment</option>
-                                        <option value="UPI">UPI / GPay / PhonePe</option>
-                                        <option value="Bank Transfer">Bank Transfer / NEFT</option>
-                                        <option value="Credit / Khata">Credit (Khata / Udhari)</option>
-                                        <option value="Split Payment">Split (Part Cash / Part Due)</option>
-                                    </select>
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                            
+                            <div class="space-y-2 text-xs text-slate-600">
+                                <div class="flex justify-between font-semibold">
+                                    <span>Items Subtotal</span>
+                                    <span id="posSubtotal" class="font-bold text-slate-900 mono">₹0</span>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Amount Received (₹)</label>
-                                    <input type="number" id="posPaidAmount" value="0" min="0" step="10" oninput="calculatePosTotals()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 mono focus:ring-2 focus:ring-teal-500">
+                                <div class="flex items-center justify-between py-1 border-y border-slate-200">
+                                    <div>
+                                        <span class="font-bold text-slate-800 block text-xs">Apply GST (Cement 28% / Pipes 18%)</span>
+                                        <span class="text-[10px] text-slate-400">Formal Telangana GST Tax Invoice</span>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="posApplyGst" onchange="calculatePosTotals()" class="sr-only peer">
+                                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-600"></div>
+                                    </label>
+                                </div>
+                                <div id="posGstRow" class="flex justify-between font-semibold text-slate-700 hidden">
+                                    <span>GST Tax</span>
+                                    <span id="posGstAmount" class="font-bold mono">₹0</span>
+                                </div>
+                                <div class="flex justify-between text-sm font-extrabold text-slate-900 pt-1">
+                                    <span>Net Bill Total</span>
+                                    <span id="posGrandTotal" class="text-teal-700 mono text-xl font-black">₹0</span>
                                 </div>
                             </div>
 
-                            <!-- Balance Due Reminder -->
-                            <div class="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white border border-slate-200">
-                                <span class="font-bold text-slate-600">Balance Pending (Added to Khata):</span>
-                                <span id="posBalanceDue" class="font-black text-rose-600 mono text-sm">₹0</span>
-                            </div>
-                        </div>
+                            <div class="pt-3 border-t border-slate-200 space-y-3">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Payment Mode</label>
+                                        <select id="posPaymentMode" onchange="handlePaymentModeChange()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800">
+                                            <option value="Cash" selected>Cash Payment</option>
+                                            <option value="UPI">UPI / GPay / PhonePe</option>
+                                            <option value="Bank Transfer">Bank Transfer / NEFT / Cheque</option>
+                                            <option value="Credit / Khata">Credit (Khata / Udhari)</option>
+                                            <option value="Split Payment">Split (Part Cash / Part Due)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">Amount Received (₹)</label>
+                                        <input type="number" id="posPaidAmount" value="0" min="0" step="1" onfocus="this.select()" oninput="calculatePosTotals()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 mono focus:ring-2 focus:ring-teal-500">
+                                    </div>
+                                </div>
 
-                        <!-- Action Buttons -->
-                        <div class="flex items-center gap-3 pt-2">
-                            <button type="button" onclick="saveSalesBill(false)" class="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
-                                <i data-lucide="save" class="w-4 h-4"></i> Save Sales Entry
-                            </button>
-                            <button type="button" onclick="saveSalesBill(true)" class="flex-1 py-3 bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-teal-600/20">
-                                <i data-lucide="printer" class="w-4 h-4"></i> Save & Print Bill
-                            </button>
+                                <!-- Balance Due Reminder -->
+                                <div class="flex justify-between items-center text-xs p-2.5 rounded-xl bg-white border border-slate-200">
+                                    <span class="font-bold text-slate-600">Balance Pending (Added to Builder Khata):</span>
+                                    <span id="posBalanceDue" class="font-black text-rose-600 mono text-sm">₹0</span>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex items-center gap-3 pt-2">
+                                <button type="button" onclick="saveSalesBill(false)" class="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
+                                    <i data-lucide="save" class="w-4 h-4"></i> Save Sales Entry
+                                </button>
+                                <button type="button" onclick="saveSalesBill(true)" class="flex-1 py-3 bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-md shadow-teal-600/20">
+                                    <i data-lucide="printer" class="w-4 h-4"></i> Save & Print Invoice
+                                </button>
+                            </div>
+
                         </div>
 
                     </div>
 
+                </div>
+
+                <!-- Right Column: Visual Touch Product Catalog -->
+                <div class="lg:col-span-5 bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div>
+                                <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                                    <i data-lucide="layout-grid" class="w-4 h-4 text-amber-600"></i>
+                                    Quick Tap Cement & Material Catalog
+                                </h3>
+                                <p class="text-[11px] text-slate-400">Click any cement bag or fitting to add directly into bill</p>
+                            </div>
+                        </div>
+
+                        <!-- Catalog Search & Category Filter -->
+                        <div class="mt-3 space-y-2">
+                            <div class="relative">
+                                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                                <input type="text" id="posCatalogSearch" oninput="renderPosCatalog()" placeholder="Search UltraTech, Maha, Nagarjuna, KCP, pipes..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-teal-500 focus:outline-none">
+                            </div>
+
+                            <div class="flex items-center gap-1 overflow-x-auto pb-1 text-[11px]">
+                                <button onclick="setPosCatalogCat('All')" class="pos-cat-btn active-pos-cat px-2.5 py-1 rounded-lg font-bold bg-slate-900 text-white whitespace-nowrap">All</button>
+                                <button onclick="setPosCatalogCat('Cement Bags (50kg)')" class="pos-cat-btn px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap">Cement Bags</button>
+                                <button onclick="setPosCatalogCat('White Cement & Putty')" class="pos-cat-btn px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap">Putty & White</button>
+                                <button onclick="setPosCatalogCat('Construction Chemicals')" class="pos-cat-btn px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap">Waterproofing</button>
+                                <button onclick="setPosCatalogCat('CPVC Pipes & SDR')" class="pos-cat-btn px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap">Pipes</button>
+                                <button onclick="setPosCatalogCat('CP Bathroom Fittings')" class="pos-cat-btn px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap">CP Taps</button>
+                            </div>
+                        </div>
+
+                        <!-- Catalog Grid -->
+                        <div id="posCatalogGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mt-3 max-h-[580px] overflow-y-auto pr-1">
+                            <!-- Populated dynamically with product cards & photos -->
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-amber-50/80 border border-amber-200/80 rounded-2xl text-[11px] text-amber-900 flex items-center justify-between">
+                        <span class="font-medium">Need to add new brand cement/product?</span>
+                        <button onclick="openAddStockModal()" class="font-bold text-amber-800 hover:underline">+ New Product</button>
+                    </div>
                 </div>
 
             </div>
@@ -513,48 +695,99 @@
             <!-- Inventory Header Banner -->
             <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
-                        <i data-lucide="boxes" class="w-5 h-5 text-teal-600"></i>
-                        CP Fittings & CPVC Inventory Master
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Manage product stock counts, purchase rates, wholesale & retail pricing</p>
+                    <div class="flex items-center gap-2">
+                        <div class="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                            <i data-lucide="boxes" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">
+                                KARNI BUILTMART - Cement & Building Materials Master
+                            </h2>
+                            <p class="text-xs text-slate-500">Live godown stock counts, purchase rates, Hyderabad cement brands, wholesale & retail pricing</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="openAddStockModal()" class="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm">
-                        <i data-lucide="plus" class="w-4 h-4"></i> Add New Product
+                <div class="flex items-center gap-2.5">
+                    <button onclick="openRestockModal()" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition flex items-center gap-1.5">
+                        <i data-lucide="truck" class="w-4 h-4 text-amber-600"></i> + Inward Truck Shipment
+                    </button>
+                    <button onclick="openAddStockModal()" class="px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm shadow-teal-600/20">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Add New Product / Brand
                     </button>
                 </div>
             </div>
 
-            <!-- Search and Filter Bar -->
+            <!-- Search, Filter & View Mode Bar -->
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div class="relative w-full sm:w-80">
-                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-                    <input type="text" id="inventorySearchInput" oninput="filterInventory()" placeholder="Search by item name, size, category..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500">
+                
+                <div class="flex items-center gap-3 w-full sm:w-auto flex-1">
+                    <div class="relative w-full sm:w-72">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="inventorySearchInput" oninput="renderInventoryTable()" placeholder="Search cement, grade, brand, HSN, godown..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+
+                    <!-- Brand Filter (Hyderabad major brands) -->
+                    <select id="inventoryBrandFilter" onchange="renderInventoryTable()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700">
+                        <option value="All">All Brands (Hyderabad & National)</option>
+                        <option value="Unbranded">Unbranded / None</option>
+                        <option value="UltraTech">UltraTech Cement</option>
+                        <option value="Maha Cement">Maha Cement (My Home)</option>
+                        <option value="Nagarjuna">Nagarjuna Cement (NCL)</option>
+                        <option value="KCP Cement">KCP Cement</option>
+                        <option value="ACC">ACC Cement</option>
+                        <option value="Penna Cement">Penna Cement</option>
+                        <option value="Zuari Cement">Zuari Cement</option>
+                        <option value="Dalmia Cement">Dalmia DSP</option>
+                        <option value="Orient / Birla A1">Orient / Birla A1</option>
+                        <option value="Priya Cement">Priya Cement</option>
+                        <option value="Bharathi Cement">Bharathi Cement</option>
+                        <option value="JK White / Putty">JK White / Putty</option>
+                        <option value="Dr. Fixit / Pidilite">Dr. Fixit / Pidilite</option>
+                        <option value="Astral">Astral Pipes</option>
+                        <option value="Ashirvad">Ashirvad Pipes</option>
+                        <option value="Jaquar">Jaquar CP Fittings</option>
+                        <option value="Supreme">Supreme Fittings</option>
+                        <option value="Generic">Generic / Local</option>
+                    </select>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-                    <button onclick="filterInventoryCategory('All')" class="inv-filter active-inv-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition">All Items</button>
-                    <button onclick="filterInventoryCategory('CPVC Pipes & SDR')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">CPVC Pipes</button>
-                    <button onclick="filterInventoryCategory('CPVC Fittings')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">CPVC Fittings</button>
-                    <button onclick="filterInventoryCategory('CP Bathroom Fittings')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">CP Bathroom Taps</button>
-                    <button onclick="filterInventoryCategory('Valves & Brass')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Valves & Brass</button>
+                <!-- Category Chips & View Toggle -->
+                <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+                    <div class="flex flex-wrap items-center gap-1">
+                        <button onclick="filterInventoryCategory('All')" class="inv-filter active-inv-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition">All</button>
+                        <button onclick="filterInventoryCategory('Cement Bags (50kg)')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Cement Bags</button>
+                        <button onclick="filterInventoryCategory('White Cement & Putty')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Putty & White</button>
+                        <button onclick="filterInventoryCategory('Construction Chemicals')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Waterproofing</button>
+                        <button onclick="filterInventoryCategory('CPVC Pipes & SDR')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Pipes</button>
+                        <button onclick="filterInventoryCategory('CP Bathroom Fittings')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">CP Bathroom</button>
+                    </div>
+
+                    <!-- Toggle Grid / Table -->
+                    <div class="flex items-center border border-slate-200 rounded-xl p-0.5 bg-slate-50">
+                        <button onclick="setInventoryViewMode('grid')" id="invModeGridBtn" class="p-1.5 rounded-lg text-slate-600 hover:text-slate-900" title="Visual Cards Grid View">
+                            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="setInventoryViewMode('table')" id="invModeTableBtn" class="p-1.5 rounded-lg bg-white shadow-xs text-teal-700 font-bold" title="Table View">
+                            <i data-lucide="table" class="w-4 h-4"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Inventory Items Table -->
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <!-- Inventory Items Table View -->
+            <div id="inventoryTableView" class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead>
                             <tr class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200">
-                                <th class="py-3 px-4">Product Code & Description</th>
-                                <th class="py-3 px-4">Category</th>
-                                <th class="py-3 px-4">Current Stock</th>
-                                <th class="py-3 px-4">Purchase Price</th>
-                                <th class="py-3 px-4">Selling Rate</th>
-                                <th class="py-3 px-4">Stock Value</th>
-                                <th class="py-3 px-4">Status</th>
+                                <th class="py-3 px-4">Item & Photo</th>
+                                <th class="py-3 px-3">Brand & Category</th>
+                                <th class="py-3 px-3">Grade / Pack / Size</th>
+                                <th class="py-3 px-3">Godown / Location</th>
+                                <th class="py-3 px-3">Stock Count</th>
+                                <th class="py-3 px-3">Purchase (₹)</th>
+                                <th class="py-3 px-3">Sell Rate (₹)</th>
+                                <th class="py-3 px-3">Valuation</th>
                                 <th class="py-3 px-4 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -563,6 +796,11 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <!-- Inventory Visual Cards Grid View -->
+            <div id="inventoryGridView" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Populated dynamically with rich product cards & images -->
             </div>
 
         </section>
@@ -577,9 +815,9 @@
                 <div>
                     <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
                         <i data-lucide="book-open" class="w-5 h-5 text-amber-500"></i>
-                        Contractor & Plumber Khata (Credit Ledger)
+                        KARNI BUILTMART - Contractor, Builder & Site Khata Ledger
                     </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Track outstanding credits, record partial payments, and send WhatsApp payment reminders</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Track cement supply credits, site payments, running balance & instant WhatsApp statements</p>
                 </div>
                 <div class="bg-amber-50 border border-amber-200 px-4 py-2 rounded-2xl flex items-center gap-3">
                     <span class="text-xs font-bold text-amber-900">Total Market Receivables:</span>
@@ -591,9 +829,9 @@
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-4">
                 <div class="relative w-full sm:w-80">
                     <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-                    <input type="text" id="khataSearchInput" oninput="filterKhata()" placeholder="Search contractor / plumber name or phone..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <input type="text" id="khataSearchInput" oninput="renderKhataAccounts()" placeholder="Search builder, contractor name, site or phone..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
-                <span class="text-xs font-bold text-slate-400"><span id="khataFilteredCount">0</span> Accounts</span>
+                <span class="text-xs font-bold text-slate-400"><span id="khataFilteredCount">0</span> Builder / Contractor Accounts</span>
             </div>
 
             <!-- Khata Cards Grid -->
@@ -612,9 +850,9 @@
                 <div>
                     <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
                         <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-600"></i>
-                        Daily Sales Journal & Tax Reports
+                        KARNI BUILTMART - Daily Sales & Dispatch Journal
                     </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Filter sales by date range, analyze margins, and export to Excel/CSV</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Filter sales by date range, analyze cement dispatch totals, and export to Excel/CSV</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="exportSalesCSV()" class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
@@ -667,81 +905,264 @@
     </main>
 
     <!-- ========================================================================= -->
-    <!-- MODAL: ADD / EDIT PRODUCT STOCK                                           -->
+    <!-- MODAL: ADD / EDIT PRODUCT STOCK (COMPREHENSIVE)                           -->
     <!-- ========================================================================= -->
-    <div id="addStockModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
-        <div class="bg-white max-w-lg w-full rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+    <div id="addStockModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-[120] hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white max-w-2xl w-full rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-6 animate-in fade-in zoom-in-95 duration-150">
             
-            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <div class="bg-teal-500 p-1.5 rounded-lg text-slate-950">
-                        <i data-lucide="plus" class="w-4 h-4 font-bold"></i>
+            <div class="p-5 bg-gradient-to-r from-slate-900 to-teal-950 text-white flex justify-between items-center">
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-amber-400 p-2 rounded-xl text-slate-950">
+                        <i data-lucide="package-plus" class="w-5 h-5 font-bold"></i>
                     </div>
-                    <h3 class="text-sm font-bold">Add / Update Product in Inventory</h3>
+                    <div>
+                        <h3 id="addStockModalTitle" class="text-sm font-extrabold text-white">Add New Product / Cement Brand</h3>
+                        <p class="text-[11px] text-slate-400">KARNI BUILTMART • Specifications, grade, pricing & photo</p>
+                    </div>
                 </div>
-                <button onclick="closeAddStockModal()" class="text-slate-400 hover:text-white">
+                <button onclick="closeAddStockModal()" class="text-slate-400 hover:text-white p-1">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <form onsubmit="handleSaveProduct(event)" class="p-6 space-y-4 text-xs">
-                <div>
-                    <label class="block font-bold text-slate-700 uppercase mb-1">Product Description *</label>
-                    <input type="text" id="prodName" required placeholder="e.g. CPVC Pipe 1 inch SDR 11 (3 Meter)" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900 focus:ring-2 focus:ring-teal-500">
+            <form onsubmit="handleSaveProduct(event)" class="p-6 space-y-4 text-xs max-h-[80vh] overflow-y-auto custom-scrollbar">
+                <input type="hidden" id="prodEditId" value="">
+
+                <!-- Product Name & Brand -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Product Description / Name *</label>
+                        <input type="text" id="prodName" required placeholder="e.g. UltraTech Super Cement (50kg Bag) / Maha Solid HD" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900 focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Brand / Company</label>
+                        <select id="prodBrand" onchange="handleProdBrandChange()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800 focus:ring-2 focus:ring-teal-500">
+                            <option value="Unbranded / None">Unbranded / None (No Brand)</option>
+                            <option value="UltraTech" selected>UltraTech Cement</option>
+                            <option value="Maha Cement">Maha Cement (My Home)</option>
+                            <option value="Nagarjuna">Nagarjuna Cement (NCL)</option>
+                            <option value="KCP Cement">KCP Cement</option>
+                            <option value="ACC">ACC Cement</option>
+                            <option value="Penna Cement">Penna Cement</option>
+                            <option value="Zuari Cement">Zuari Cement</option>
+                            <option value="Dalmia Cement">Dalmia Cement</option>
+                            <option value="Orient / Birla A1">Orient / Birla A1</option>
+                            <option value="Priya Cement">Priya Cement</option>
+                            <option value="Bharathi Cement">Bharathi Cement</option>
+                            <option value="JK White / Putty">JK White / Putty</option>
+                            <option value="Birla White">Birla White</option>
+                            <option value="Dr. Fixit / Pidilite">Dr. Fixit / Pidilite</option>
+                            <option value="Astral">Astral Pipes</option>
+                            <option value="Ashirvad">Ashirvad Pipes</option>
+                            <option value="Jaquar">Jaquar CP Fittings</option>
+                            <option value="Supreme">Supreme Fittings</option>
+                            <option value="Generic / Local">Generic / Local</option>
+                            <option value="Custom">Custom Brand (Type Custom)...</option>
+                        </select>
+                        <input type="text" id="prodCustomBrand" placeholder="Enter custom brand name..." class="w-full mt-1.5 px-3 py-1.5 bg-amber-50 border border-amber-300 rounded-xl font-bold text-slate-900 text-xs hidden focus:ring-2 focus:ring-amber-500">
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <!-- Category, Grade & Unit -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                        <label class="block font-bold text-slate-700 uppercase mb-1">Category</label>
-                        <select id="prodCategory" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800">
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Category *</label>
+                        <select id="prodCategory" onchange="autoSuggestPresetImage()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800">
+                            <option value="Cement Bags (50kg)" selected>Cement Bags (50kg)</option>
+                            <option value="White Cement & Putty">White Cement & Wall Putty</option>
+                            <option value="Construction Chemicals">Construction Chemicals & Waterproofing</option>
                             <option value="CPVC Pipes & SDR">CPVC Pipes & SDR</option>
-                            <option value="CPVC Fittings">CPVC Fittings (Elbow/Tee/Coupler)</option>
-                            <option value="CP Bathroom Fittings">CP Bathroom Fittings (Bib/Pillar/Mixer)</option>
+                            <option value="CPVC Fittings">CPVC Fittings (Elbow/Tee)</option>
+                            <option value="CP Bathroom Fittings">CP Bathroom Fittings (Taps/Mixer)</option>
                             <option value="Valves & Brass">Valves & Brass MTA/FTA</option>
                             <option value="Solvents & Consumables">Solvents & Consumables</option>
                         </select>
                     </div>
                     <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Grade / Specification</label>
+                        <select id="prodSize" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800">
+                            <option value="PPC (Portland Pozzolana)" selected>PPC (Portland Pozzolana)</option>
+                            <option value="OPC 53 Grade">OPC 53 Grade (High Strength)</option>
+                            <option value="OPC 43 Grade">OPC 43 Grade</option>
+                            <option value="Weather Pro / Water Shield">Weather Pro / Water Shield</option>
+                            <option value="Super Grade / Composite">Super Grade / Composite</option>
+                            <option value="40kg Bag (Wall Putty)">40kg Bag (Wall Putty)</option>
+                            <option value="1 Ltr Can / Bottle">1 Ltr Can / Bottle</option>
+                            <option value="5 Ltr Can">5 Ltr Can</option>
+                            <option value="20 Ltr Bucket">20 Ltr Bucket</option>
+                            <option value="3/4 inch (20mm)">3/4" (20mm Pipe/Fitting)</option>
+                            <option value="1 inch (25mm)">1" (25mm Pipe/Fitting)</option>
+                            <option value="1/2 inch (15mm)">1/2" (15mm Tap/Fitting)</option>
+                            <option value="Standard / Universal">Standard / Universal</option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="block font-bold text-slate-700 uppercase mb-1">Unit of Measure</label>
                         <select id="prodUnit" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800">
+                            <option value="Bags (50kg)" selected>Bags (50kg)</option>
+                            <option value="Bags (40kg)">Bags (40kg Putty)</option>
+                            <option value="Bags (25kg)">Bags (25kg)</option>
+                            <option value="Cans">Cans / Litres</option>
+                            <option value="Buckets">Buckets (20L)</option>
+                            <option value="Lengths">Lengths (3m Pipe)</option>
                             <option value="Pcs">Pieces (Pcs)</option>
-                            <option value="Lengths">Lengths / Pipes</option>
-                            <option value="Meters">Meters</option>
                             <option value="Boxes">Boxes</option>
-                            <option value="Bottles">Bottles</option>
+                            <option value="Tons">Tons (MT)</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-3">
+                <!-- Product Image Selector & Upload Section -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                    <label class="block font-bold text-slate-700 uppercase">Product Image / Photo</label>
+                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                        <!-- Preview Thumbnail -->
+                        <div class="w-20 h-20 rounded-2xl bg-white border-2 border-dashed border-slate-300 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                            <img id="prodImagePreview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                            <div id="prodImagePlaceholder" class="text-center text-slate-400 p-2">
+                                <i data-lucide="image" class="w-6 h-6 mx-auto mb-0.5"></i>
+                                <span class="text-[9px] block">No Photo</span>
+                            </div>
+                        </div>
+
+                        <!-- Upload & Preset Buttons -->
+                        <div class="flex-1 space-y-2 w-full">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <label class="cursor-pointer px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 rounded-xl font-bold text-[11px] text-slate-700 flex items-center gap-1.5 shadow-xs">
+                                    <i data-lucide="upload" class="w-3.5 h-3.5 text-teal-600"></i> Upload Photo (Device)
+                                    <input type="file" id="prodImageFileInput" accept="image/*" onchange="handleProductImageUpload(event)" class="hidden">
+                                </label>
+                                <button type="button" onclick="openPresetImagePicker()" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl font-bold text-[11px] text-amber-900 flex items-center gap-1">
+                                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-600"></i> Pick from Cement & Materials Gallery
+                                </button>
+                            </div>
+                            <input type="url" id="prodImageUrl" oninput="updateImagePreviewFromUrl(this.value)" placeholder="Or paste web image URL (https://...)" class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-[11px] font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Quantities & Rates -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div>
-                        <label class="block font-bold text-slate-700 uppercase mb-1">Stock Qty</label>
-                        <input type="number" id="prodStock" required min="0" value="50" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono">
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Godown Stock</label>
+                        <input type="number" id="prodStock" required min="0" value="200" onfocus="this.select()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-slate-900 focus:ring-2 focus:ring-teal-500">
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 uppercase mb-1">Purchase Rate (₹)</label>
-                        <input type="number" id="prodCost" required min="0" step="0.5" value="100" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono">
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Purchase / Dealer Cost (₹)</label>
+                        <input type="number" id="prodCost" required min="0" step="1" value="340" onfocus="this.select()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-slate-700 focus:ring-2 focus:ring-teal-500">
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 uppercase mb-1">Selling Rate (₹)</label>
-                        <input type="number" id="prodPrice" required min="0" step="0.5" value="140" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-teal-700">
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Retail Selling Rate (₹)</label>
+                        <input type="number" id="prodPrice" required min="0" step="1" value="385" onfocus="this.select()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-teal-700 focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Builder / Wholesale Rate (₹)</label>
+                        <input type="number" id="prodWholesale" min="0" step="1" value="365" onfocus="this.select()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-slate-700 focus:ring-2 focus:ring-teal-500">
+                    </div>
+                </div>
+
+                <!-- Min Alert, Rack Location, HSN -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Min. Buffer Alert Level</label>
+                        <input type="number" id="prodMinStock" value="50" min="1" onfocus="this.select()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Godown / Shed Location</label>
+                        <input type="text" id="prodLocation" placeholder="e.g. Godown Bay 1 / Stack A" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">HSN Code</label>
+                        <input type="text" id="prodHsn" placeholder="e.g. 2523 (Cement) / 3917" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold mono" value="2523">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeAddStockModal()" class="px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold shadow-sm shadow-teal-600/20">Save Product to Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: PRESET CEMENT & FITTINGS IMAGE PICKER GALLERY                       -->
+    <!-- ========================================================================= -->
+    <div id="presetImagePickerModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[130] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-xl w-full rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col">
+            <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="image" class="w-4 h-4 text-amber-400"></i>
+                    <h4 class="text-xs font-bold uppercase tracking-wider">Select Material Photo from Catalog</h4>
+                </div>
+                <button onclick="closePresetImagePicker()" class="text-slate-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div class="p-4 max-h-[420px] overflow-y-auto grid grid-cols-3 sm:grid-cols-4 gap-3 custom-scrollbar">
+                <div id="galleryPresetsGrid" class="contents"></div>
+            </div>
+
+            <div class="p-3 bg-slate-50 border-t border-slate-100 text-right">
+                <button onclick="closePresetImagePicker()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 rounded-xl text-xs font-bold text-slate-700">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: QUICK RESTOCK / INCOMING TRUCK SHIPMENT ENTRY                      -->
+    <!-- ========================================================================= -->
+    <div id="restockModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-[120] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex justify-between items-start pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2 rounded-xl bg-amber-50 text-amber-700">
+                        <i data-lucide="truck" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-base font-bold text-slate-900">Inward Truck / Trailer Shipment</h4>
+                        <p class="text-xs text-slate-500">Record incoming cement / materials to godown</p>
+                    </div>
+                </div>
+                <button onclick="closeRestockModal()" class="text-slate-400 hover:text-slate-700">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleInwardStock(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Select Cement / Product *</label>
+                    <select id="restockProductId" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900 focus:ring-2 focus:ring-teal-500">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Quantity Received (Bags/Units) *</label>
+                        <input type="number" id="restockQty" required min="1" value="200" onfocus="this.select()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-black mono text-emerald-700 text-sm focus:ring-2 focus:ring-teal-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Purchase / Dealer Rate (₹/unit)</label>
+                        <input type="number" id="restockCost" step="1" onfocus="this.select()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-slate-900 focus:ring-2 focus:ring-teal-500">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block font-bold text-slate-700 uppercase mb-1">Min. Reorder Alert Level</label>
-                        <input type="number" id="prodMinStock" value="10" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono">
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Manufacturer / Depot</label>
+                        <input type="text" id="restockSupplier" placeholder="e.g. UltraTech Depot Hyderabad" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium">
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 uppercase mb-1">HSN / Item Code</label>
-                        <input type="text" id="prodHsn" placeholder="e.g. 3917 / 8481" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold mono">
+                        <label class="block font-bold text-slate-700 uppercase mb-1">Truck / Lorry / Invoice #</label>
+                        <input type="text" id="restockInvoiceRef" placeholder="e.g. TS09UB4421 / INV-8821" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold mono">
                     </div>
                 </div>
 
-                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
-                    <button type="button" onclick="closeAddStockModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Cancel</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold shadow-sm">Save to Stock</button>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeRestockModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-extrabold shadow-sm">Add to Godown Stock</button>
                 </div>
             </form>
         </div>
@@ -750,8 +1171,8 @@
     <!-- ========================================================================= -->
     <!-- MODAL: RECORD KHATA PAYMENT RECEIVED                                      -->
     <!-- ========================================================================= -->
-    <div id="khataPaymentModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-4">
-        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4">
+    <div id="khataPaymentModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[120] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div class="flex justify-between items-start pb-3 border-b border-slate-100">
                 <div>
                     <h4 class="text-base font-bold text-slate-900">Record Payment Received</h4>
@@ -770,19 +1191,19 @@
             <div class="space-y-3 text-xs">
                 <div>
                     <label class="block font-bold text-slate-700 uppercase mb-1">Amount Collected (₹) *</label>
-                    <input type="number" id="khataPayAmount" placeholder="e.g. 5000" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-emerald-700 text-sm">
+                    <input type="number" id="khataPayAmount" placeholder="e.g. 50000" onfocus="this.select()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-emerald-700 text-sm focus:ring-2 focus:ring-teal-500">
                 </div>
                 <div>
                     <label class="block font-bold text-slate-700 uppercase mb-1">Payment Method</label>
                     <select id="khataPayMethod" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800">
                         <option value="Cash" selected>Cash Payment</option>
                         <option value="UPI">UPI / GPay / PhonePe</option>
-                        <option value="Bank Transfer">Bank Transfer / Cheque</option>
+                        <option value="Bank Transfer">Bank Transfer / RTGS / Cheque</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block font-bold text-slate-700 uppercase mb-1">Reference / Note</label>
-                    <input type="text" id="khataPayNote" placeholder="e.g. Site Flat 204 payment clearance" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium">
+                    <label class="block font-bold text-slate-700 uppercase mb-1">Site Reference / Note</label>
+                    <input type="text" id="khataPayNote" placeholder="e.g. Madhapur Tower B slab cement clearance" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-medium">
                 </div>
             </div>
 
@@ -794,19 +1215,19 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- PRINTABLE INVOICE / SALES SLIP MODAL                                      -->
+    <!-- MODAL: PRINTABLE TAX INVOICE (KARNI BUILTMART HYDERABAD)                   -->
     <!-- ========================================================================= -->
-    <div id="invoiceModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-[115] hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div id="invoiceModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-[125] hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white max-w-2xl w-full rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-8">
             
             <div class="p-4 bg-slate-900 text-white flex justify-between items-center no-print">
                 <div class="flex items-center gap-2">
-                    <i data-lucide="printer" class="w-4 h-4 text-teal-400"></i>
-                    <span class="text-xs font-bold">Print Preview / Tax Invoice</span>
+                    <i data-lucide="printer" class="w-4 h-4 text-amber-400"></i>
+                    <span class="text-xs font-bold">KARNI BUILTMART • Tax Invoice & Delivery Slip</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="window.print()" class="px-3.5 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-black text-xs rounded-lg transition shadow-xs flex items-center gap-1">
-                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print Bill
+                    <button onclick="window.print()" class="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-lg transition shadow-xs flex items-center gap-1">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print Invoice
                     </button>
                     <button onclick="closeInvoiceModal()" class="text-slate-400 hover:text-white p-1">
                         <i data-lucide="x" class="w-5 h-5"></i>
@@ -820,16 +1241,16 @@
                 <!-- Bill Header -->
                 <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4">
                     <div>
-                        <h2 class="text-2xl font-black tracking-tight text-slate-900">AQUAPRO FITTINGS & PIPES</h2>
-                        <p class="text-xs font-bold text-slate-600 mt-0.5">Wholesale & Retail: CP Bathroom Fittings, CPVC SDR 11/13.5 Pipes, Brass Valves</p>
-                        <p class="text-[11px] text-slate-500">Shop No 14, Plumbing Hardware Market, Main Road • Mob: +91 98765 43210</p>
-                        <p class="text-[11px] text-slate-500 font-semibold mono">GSTIN: 27AABCA9820M1ZQ</p>
+                        <h2 class="text-2xl font-black tracking-tight text-slate-900">KARNI BUILTMART</h2>
+                        <p class="text-xs font-bold text-slate-700 mt-0.5">Authorised Distributors: UltraTech, Maha, Nagarjuna, KCP Cement, CPVC Pipes & Sanitary</p>
+                        <p class="text-[11px] text-slate-600">Shop No 5-2-88, Ranigunj / Begum Bazar Main Road, Secunderabad - Hyderabad, Telangana • Mob: +91 98490 12345</p>
+                        <p class="text-[11px] text-slate-700 font-semibold mono">GSTIN: 36AABCS9820M1ZQ (Telangana State - Code 36)</p>
                     </div>
                     <div class="text-right">
-                        <span class="inline-block px-2.5 py-1 bg-slate-900 text-white text-[10px] font-black uppercase rounded tracking-wider">RETAIL INVOICE</span>
+                        <span class="inline-block px-2.5 py-1 bg-slate-900 text-white text-[10px] font-black uppercase rounded tracking-wider">TAX INVOICE / CHALLAN</span>
                         <div class="mt-2 text-xs font-bold mono">
-                            <div>Invoice: <span id="invPrintNo">INV-2026-0001</span></div>
-                            <div class="text-slate-500 font-medium">Date: <span id="invPrintDate">2026-08-27</span></div>
+                            <div>Invoice: <span id="invPrintNo">KB-2026-0001</span></div>
+                            <div class="text-slate-500 font-medium">Date: <span id="invPrintDate">2026-08-28</span></div>
                         </div>
                     </div>
                 </div>
@@ -837,10 +1258,10 @@
                 <!-- Customer Details -->
                 <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                     <div>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Billed To Customer:</span>
-                        <div id="invPrintCustName" class="font-extrabold text-slate-900 text-sm">Ramesh Plumber</div>
-                        <div id="invPrintCustPhone" class="text-slate-600 font-semibold mono">+91 9876543210</div>
-                        <div id="invPrintCustType" class="text-[10px] text-teal-700 font-bold">Plumber / Contractor</div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Billed To / Site Name:</span>
+                        <div id="invPrintCustName" class="font-extrabold text-slate-900 text-sm">Sri Rama Constructions</div>
+                        <div id="invPrintCustPhone" class="text-slate-600 font-semibold mono">+91 98490 12345</div>
+                        <div id="invPrintCustType" class="text-[10px] text-teal-700 font-bold">Civil Contractor / Builder</div>
                     </div>
                     <div class="text-right">
                         <span class="text-[10px] font-bold text-slate-400 uppercase block">Payment Status:</span>
@@ -855,7 +1276,7 @@
                         <thead>
                             <tr class="border-y-2 border-slate-900 text-slate-900 font-black uppercase text-[10px]">
                                 <th class="py-2">#</th>
-                                <th class="py-2">Item Description</th>
+                                <th class="py-2">Item Description & Brand</th>
                                 <th class="py-2 text-center">Qty</th>
                                 <th class="py-2 text-right">Rate</th>
                                 <th class="py-2 text-right">Disc</th>
@@ -872,8 +1293,9 @@
                 <div class="border-t-2 border-slate-900 pt-3 flex justify-between items-start text-xs">
                     <div class="max-w-xs text-[10px] text-slate-500 space-y-1">
                         <p class="font-bold text-slate-700">Terms & Conditions:</p>
-                        <p>1. Goods once sold will not be taken back without original bill.</p>
-                        <p>2. Subject to local jurisdiction only.</p>
+                        <p>1. Cement unloading at site is buyer responsibility unless specified.</p>
+                        <p>2. Goods once delivered cannot be returned without original challan.</p>
+                        <p>3. Subject to Hyderabad / Secunderabad jurisdiction only.</p>
                     </div>
                     <div class="w-64 space-y-1 text-right">
                         <div class="flex justify-between text-slate-600 font-medium">
@@ -881,7 +1303,7 @@
                             <span id="invPrintSubtotal" class="font-bold mono text-slate-900">₹0</span>
                         </div>
                         <div id="invPrintGstRow" class="flex justify-between text-slate-600 font-medium hidden">
-                            <span>GST (18%):</span>
+                            <span>GST:</span>
                             <span id="invPrintGst" class="font-bold mono text-slate-900">₹0</span>
                         </div>
                         <div class="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-slate-300">
@@ -903,11 +1325,12 @@
                 <div class="pt-8 flex justify-between items-end text-center text-xs">
                     <div>
                         <div class="w-32 border-b border-slate-400 mx-auto"></div>
-                        <span class="text-[10px] text-slate-500 mt-1 block">Customer Signature</span>
+                        <span class="text-[10px] text-slate-500 mt-1 block">Receiver / Site Signature</span>
                     </div>
                     <div>
                         <div class="w-36 border-b border-slate-400 mx-auto"></div>
-                        <span class="text-[10px] font-bold text-slate-800 mt-1 block">For AQUAPRO FITTINGS</span>
+                        <span class="text-[10px] font-bold text-slate-800 mt-1 block">For KARNI BUILTMART</span>
+                        <span class="text-[9px] font-bold text-slate-600 block">Sarda (Proprietor)</span>
                     </div>
                 </div>
 
@@ -920,9 +1343,11 @@
     <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-12 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-3">
             <div class="flex items-center space-x-2">
-                <span class="font-extrabold text-white">AQUAPRO CP & CPVC ERP</span>
+                <span class="font-extrabold text-white">KARNI BUILTMART</span>
                 <span>•</span>
-                <span class="text-teal-400">Offline-Ready Local Database</span>
+                <span class="text-amber-400">Hyderabad (Telangana)</span>
+                <span>•</span>
+                <span class="text-slate-400">Cement & Building Material ERP</span>
             </div>
             <div class="flex items-center gap-4 text-[11px] text-slate-400">
                 <button onclick="exportFullBackupJSON()" class="hover:text-white transition flex items-center gap-1">
@@ -939,80 +1364,116 @@
     <!-- APPLICATION JAVASCRIPT LOGIC & STATE PERSISTENCE                          -->
     <!-- ========================================================================= -->
     <script>
-        // Sample Initial Catalog of CP Fittings & CPVC Pipes
-        const INITIAL_INVENTORY = [
-            { id: 'p_1', name: 'CPVC Pipe 1" SDR 11 (3 Meter Length)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 85, costPrice: 280, sellPrice: 380, minStock: 20, hsn: '3917' },
-            { id: 'p_2', name: 'CPVC Pipe 3/4" SDR 11 (3 Meter Length)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 120, costPrice: 195, sellPrice: 265, minStock: 30, hsn: '3917' },
-            { id: 'p_3', name: 'CPVC Pipe 1/2" SDR 11 (3 Meter Length)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 15, costPrice: 140, sellPrice: 190, minStock: 25, hsn: '3917' }, // Low stock
-            { id: 'p_4', name: 'CPVC Brass Elbow 3/4" x 1/2" (Female Thread)', category: 'CPVC Fittings', unit: 'Pcs', stock: 240, costPrice: 62, sellPrice: 88, minStock: 50, hsn: '3917' },
-            { id: 'p_5', name: 'CPVC Plain Elbow 1" 90 Degree', category: 'CPVC Fittings', unit: 'Pcs', stock: 180, costPrice: 22, sellPrice: 35, minStock: 40, hsn: '3917' },
-            { id: 'p_6', name: 'CPVC Plain Tee 1" Equal', category: 'CPVC Fittings', unit: 'Pcs', stock: 95, costPrice: 32, sellPrice: 48, minStock: 30, hsn: '3917' },
-            { id: 'p_7', name: 'CPVC Brass MTA (Male Thread) 3/4"', category: 'Valves & Brass', unit: 'Pcs', stock: 110, costPrice: 58, sellPrice: 82, minStock: 30, hsn: '7412' },
-            { id: 'p_8', name: 'CPVC Ball Valve 1" Heavy', category: 'Valves & Brass', unit: 'Pcs', stock: 8, costPrice: 160, sellPrice: 225, minStock: 15, hsn: '8481' }, // Low stock
-            { id: 'p_9', name: 'CP Brass Bib Cock with Foam Flow (Chrome Plated)', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 45, costPrice: 290, sellPrice: 450, minStock: 10, hsn: '8481' },
-            { id: 'p_10', name: 'CP Brass Long Body Tap 2-in-1 Dual Knob', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 32, costPrice: 520, sellPrice: 790, minStock: 10, hsn: '8481' },
-            { id: 'p_11', name: 'CP Pillar Cock for Wash Basin (Heavy Brass)', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 28, costPrice: 420, sellPrice: 650, minStock: 8, hsn: '8481' },
-            { id: 'p_12', name: 'CP Angle Valve Ceramic Disc (Heavy)', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 150, costPrice: 145, sellPrice: 230, minStock: 30, hsn: '8481' },
-            { id: 'p_13', name: 'CP Concealed Stop Cock 15mm with Flange', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 18, costPrice: 360, sellPrice: 540, minStock: 12, hsn: '8481' },
-            { id: 'p_14', name: 'CP Overhead Rain Shower 4x4" with Shower Arm', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 6, costPrice: 480, sellPrice: 750, minStock: 10, hsn: '8481' }, // Low stock
-            { id: 'p_15', name: 'CPVC Solvent Cement 250ml Tin (Heavy Duty)', category: 'Solvents & Consumables', unit: 'Bottles', stock: 65, costPrice: 110, sellPrice: 160, minStock: 20, hsn: '3506' },
-            { id: 'p_16', name: 'PTFE Teflon Tape (12mm x 10 Meter)', category: 'Solvents & Consumables', unit: 'Pcs', stock: 300, costPrice: 8, sellPrice: 15, minStock: 50, hsn: '3919' }
+        // Preset Gallery Product Images (High-quality cement bags, putty, chemicals & pipes)
+        const PRESET_PRODUCT_IMAGES = [
+            { id: 'img_cement_ultratech', name: 'UltraTech Cement Bag', category: 'Cement Bags (50kg)', url: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_cement_maha', name: 'Maha Cement 50kg Bag', category: 'Cement Bags (50kg)', url: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_cement_nagarjuna', name: 'Nagarjuna Cement 50kg', category: 'Cement Bags (50kg)', url: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_cement_kcp', name: 'KCP Cement OPC 53', category: 'Cement Bags (50kg)', url: 'https://images.unsplash.com/photo-1541888946425-d0fbb186156a?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_cement_acc', name: 'ACC Concrete+ Bag', category: 'Cement Bags (50kg)', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_wall_putty', name: 'Birla / JK Wall Putty', category: 'White Cement & Putty', url: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_drfixit_lw', name: 'Dr. Fixit 101 LW+ (Waterproofing)', category: 'Construction Chemicals', url: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_tile_adhesive', name: 'Roff Tile Adhesive (20kg)', category: 'Construction Chemicals', url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_cpvc_pipe', name: 'CPVC Pipes (Astral/Ashirvad)', category: 'CPVC Pipes & SDR', url: 'https://images.unsplash.com/photo-1542013936693-884638332954?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_brass_elbow', name: 'Brass Elbow / Fitting', category: 'CPVC Fittings', url: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_cp_tap_bib', name: 'CP Bib Cock Tap (Jaquar)', category: 'CP Bathroom Fittings', url: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300&auto=format&fit=crop&q=80' },
+            { id: 'img_ball_valve', name: 'Heavy Ball Valve 1"', category: 'Valves & Brass', url: 'https://images.unsplash.com/photo-1616401784845-180882ba9ba8?w=300&auto=format&fit=crop&q=80' }
         ];
 
-        // Sample Initial Sales
+        // KARNI BUILTMART Initial Comprehensive Catalog (Cement Brands in Hyderabad + CPVC)
+        const INITIAL_INVENTORY = [
+            // CEMENT CATEGORY (Hyderabad Major Brands)
+            { id: 'c_1', name: 'UltraTech Super Cement (50kg Bag) PPC', brand: 'UltraTech', size: 'PPC (Portland Pozzolana)', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 450, costPrice: 345, sellPrice: 385, wholesalePrice: 370, minStock: 100, location: 'Godown Bay 1', hsn: '2523', image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_2', name: 'UltraTech Weather Pro (50kg Water-Shield)', brand: 'UltraTech', size: 'Weather Pro / Water Shield', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 220, costPrice: 380, sellPrice: 430, wholesalePrice: 410, minStock: 50, location: 'Godown Bay 1', hsn: '2523', image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_3', name: 'Maha Solid Cement 50kg Bag (My Home)', brand: 'Maha Cement', size: 'PPC (Portland Pozzolana)', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 380, costPrice: 325, sellPrice: 365, wholesalePrice: 350, minStock: 80, location: 'Godown Bay 2', hsn: '2523', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_4', name: 'Maha HD OPC 53 Grade (50kg Bag)', brand: 'Maha Cement', size: 'OPC 53 Grade', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 190, costPrice: 345, sellPrice: 390, wholesalePrice: 375, minStock: 50, location: 'Godown Bay 2', hsn: '2523', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_5', name: 'Nagarjuna Cement OPC 53 (50kg NCL)', brand: 'Nagarjuna', size: 'OPC 53 Grade', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 310, costPrice: 335, sellPrice: 375, wholesalePrice: 360, minStock: 70, location: 'Godown Bay 3', hsn: '2523', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_6', name: 'KCP Shreepuram Cement PPC (50kg Bag)', brand: 'KCP Cement', size: 'PPC (Portland Pozzolana)', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 260, costPrice: 320, sellPrice: 360, wholesalePrice: 345, minStock: 60, location: 'Godown Bay 3', hsn: '2523', image: 'https://images.unsplash.com/photo-1541888946425-d0fbb186156a?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_7', name: 'ACC Concrete+ Power Cement (50kg Bag)', brand: 'ACC', size: 'Super Grade / Composite', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 180, costPrice: 340, sellPrice: 380, wholesalePrice: 365, minStock: 50, location: 'Godown Bay 4', hsn: '2523', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_8', name: 'Penna Suraksha Power Cement 50kg', brand: 'Penna Cement', size: 'PPC (Portland Pozzolana)', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 150, costPrice: 315, sellPrice: 355, wholesalePrice: 340, minStock: 40, location: 'Godown Bay 4', hsn: '2523', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_9', name: 'Zuari Super Cement (50kg Bag)', brand: 'Zuari Cement', size: 'PPC (Portland Pozzolana)', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 120, costPrice: 310, sellPrice: 350, wholesalePrice: 335, minStock: 40, location: 'Godown Bay 5', hsn: '2523', image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_10', name: 'Dalmia DSP Cement (50kg Dhalai Special)', brand: 'Dalmia Cement', size: 'Super Grade / Composite', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 110, costPrice: 350, sellPrice: 395, wholesalePrice: 380, minStock: 30, location: 'Godown Bay 5', hsn: '2523', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_11', name: 'Birla A1 StrongCrete / Orient Gold 50kg', brand: 'Orient / Birla A1', size: 'OPC 53 Grade', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 90, costPrice: 330, sellPrice: 370, wholesalePrice: 355, minStock: 30, location: 'Godown Bay 5', hsn: '2523', image: 'https://images.unsplash.com/photo-1541888946425-d0fbb186156a?w=300&auto=format&fit=crop&q=80' },
+
+            // WHITE CEMENT & PUTTY
+            { id: 'p_1', name: 'JK Wall Care Putty (40kg Bag)', brand: 'JK White / Putty', size: '40kg Bag (Wall Putty)', category: 'White Cement & Putty', unit: 'Bags (40kg)', stock: 140, costPrice: 680, sellPrice: 820, wholesalePrice: 770, minStock: 30, location: 'Shed P-1', hsn: '3214', image: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300&auto=format&fit=crop&q=80' },
+            { id: 'p_2', name: 'Birla White Wall Care Putty (40kg Bag)', brand: 'Birla White', size: '40kg Bag (Wall Putty)', category: 'White Cement & Putty', unit: 'Bags (40kg)', stock: 120, costPrice: 710, sellPrice: 860, wholesalePrice: 800, minStock: 30, location: 'Shed P-1', hsn: '3214', image: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300&auto=format&fit=crop&q=80' },
+            { id: 'p_3', name: 'Birla White Cement (50kg Bag)', brand: 'Birla White', size: 'PPC (Portland Pozzolana)', category: 'White Cement & Putty', unit: 'Bags (50kg)', stock: 65, costPrice: 950, sellPrice: 1150, wholesalePrice: 1080, minStock: 15, location: 'Shed P-2', hsn: '2523', image: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300&auto=format&fit=crop&q=80' },
+
+            // CONSTRUCTION CHEMICALS & WATERPROOFING
+            { id: 'ch_1', name: 'Dr. Fixit 101 LW+ Integral Waterproofing (5 Ltr)', brand: 'Dr. Fixit / Pidilite', size: '5 Ltr Can', category: 'Construction Chemicals', unit: 'Cans', stock: 45, costPrice: 520, sellPrice: 690, wholesalePrice: 620, minStock: 10, location: 'Rack CH-1', hsn: '3824', image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=300&auto=format&fit=crop&q=80' },
+            { id: 'ch_2', name: 'Dr. Fixit 101 LW+ Integral Waterproofing (20 Ltr Drum)', brand: 'Dr. Fixit / Pidilite', size: '20 Ltr Bucket', category: 'Construction Chemicals', unit: 'Buckets', stock: 22, costPrice: 1950, sellPrice: 2450, wholesalePrice: 2250, minStock: 5, location: 'Rack CH-2', hsn: '3824', image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=300&auto=format&fit=crop&q=80' },
+            { id: 'ch_3', name: 'Roff T01 Tile Adhesive Powder (20kg Bag)', brand: 'Dr. Fixit / Pidilite', size: 'Standard / Universal', category: 'Construction Chemicals', unit: 'Bags (25kg)', stock: 75, costPrice: 240, sellPrice: 320, wholesalePrice: 290, minStock: 20, location: 'Rack CH-3', hsn: '3824', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&auto=format&fit=crop&q=80' },
+
+            // CPVC PIPES & FITTINGS
+            { id: 'pl_1', name: 'Astral CPVC Pipe 1" SDR 11 (3 Meter Length)', brand: 'Astral', size: '1 inch (25mm)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 110, costPrice: 280, sellPrice: 380, wholesalePrice: 340, minStock: 20, location: 'Pipe Rack A-1', hsn: '3917', image: 'https://images.unsplash.com/photo-1542013936693-884638332954?w=300&auto=format&fit=crop&q=80' },
+            { id: 'pl_2', name: 'Ashirvad CPVC Pipe 3/4" SDR 11 (3 Meter)', brand: 'Ashirvad', size: '3/4 inch (20mm)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 140, costPrice: 195, sellPrice: 265, wholesalePrice: 240, minStock: 30, location: 'Pipe Rack A-2', hsn: '3917', image: 'https://images.unsplash.com/photo-1542013936693-884638332954?w=300&auto=format&fit=crop&q=80' },
+            { id: 'pl_3', name: 'Astral CPVC Brass Elbow 3/4" x 1/2" Female', brand: 'Astral', size: '3/4 inch (20mm)', category: 'CPVC Fittings', unit: 'Pcs', stock: 240, costPrice: 62, sellPrice: 88, wholesalePrice: 78, minStock: 50, location: 'Bin B-12', hsn: '3917', image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=300&auto=format&fit=crop&q=80' },
+            { id: 'pl_4', name: 'Jaquar CP Brass Bib Cock Tap (Foam Flow)', brand: 'Jaquar', size: '1/2 inch (15mm)', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 45, costPrice: 290, sellPrice: 450, wholesalePrice: 390, minStock: 10, location: 'Showcase S-1', hsn: '8481', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300&auto=format&fit=crop&q=80' }
+        ];
+
+        // Sample Initial Sales for Karni Builtmart Hyderabad
         const INITIAL_SALES = [
             {
-                invoiceNo: 'INV-2026-0001',
+                invoiceNo: 'KB-2026-0001',
                 date: getTodayDateString(),
-                customerName: 'Ramesh Plumber & Sons',
-                customerPhone: '9823412345',
-                customerType: 'Plumber / Contractor',
+                customerName: 'Sri Rama Constructions (GVK Site)',
+                customerPhone: '9849012345',
+                customerType: 'Civil Contractor / Builder',
                 items: [
-                    { productId: 'p_1', name: 'CPVC Pipe 1" SDR 11 (3 Meter Length)', qty: 10, rate: 380, disc: 5, total: 3610 },
-                    { productId: 'p_4', name: 'CPVC Brass Elbow 3/4" x 1/2"', qty: 20, rate: 88, disc: 0, total: 1760 },
-                    { productId: 'p_15', name: 'CPVC Solvent Cement 250ml', qty: 2, rate: 160, disc: 0, total: 320 }
+                    { productId: 'c_1', name: 'UltraTech Super Cement (50kg Bag) PPC', qty: 100, rate: 370, disc: 0, total: 37000 },
+                    { productId: 'ch_1', name: 'Dr. Fixit 101 LW+ (5 Ltr)', qty: 4, rate: 620, disc: 0, total: 2480 }
                 ],
-                subtotal: 5690,
+                subtotal: 39480,
                 applyGst: false,
                 gstAmount: 0,
-                grandTotal: 5690,
-                paymentMode: 'Cash',
-                paidAmount: 5690,
-                balanceDue: 0,
-                notes: 'Delivered for Shanti Nagar Site'
+                grandTotal: 39480,
+                paymentMode: 'Credit / Khata',
+                paidAmount: 15000,
+                balanceDue: 24480,
+                notes: 'Delivered at Gachibowli Highrise Site Tower 2'
             },
             {
-                invoiceNo: 'INV-2026-0002',
+                invoiceNo: 'KB-2026-0002',
                 date: getTodayDateString(),
-                customerName: 'Shree Sai Builders & Infra',
-                customerPhone: '9845098450',
-                customerType: 'Builder / Site Project',
+                customerName: 'Venkateshwara Builders & Developers',
+                customerPhone: '9866123456',
+                customerType: 'Civil Contractor / Builder',
                 items: [
-                    { productId: 'p_9', name: 'CP Brass Bib Cock with Foam Flow', qty: 12, rate: 450, disc: 10, total: 4860 },
-                    { productId: 'p_11', name: 'CP Pillar Cock for Wash Basin', qty: 6, rate: 650, disc: 10, total: 3510 },
-                    { productId: 'p_12', name: 'CP Angle Valve Ceramic Disc', qty: 24, rate: 230, disc: 5, total: 5244 }
+                    { productId: 'c_3', name: 'Maha Solid Cement 50kg Bag', qty: 50, rate: 365, disc: 0, total: 18250 },
+                    { productId: 'p_1', name: 'JK Wall Care Putty (40kg Bag)', qty: 10, rate: 820, disc: 0, total: 8200 }
                 ],
-                subtotal: 13614,
+                subtotal: 26450,
                 applyGst: true,
-                gstAmount: 2450.52,
-                grandTotal: 16064.52,
-                paymentMode: 'Credit / Khata',
-                paidAmount: 5000,
-                balanceDue: 11064.52,
-                notes: 'Sky Villa Tower B Fitting Phase 1'
+                gstAmount: 4761,
+                grandTotal: 31211,
+                paymentMode: 'Cash',
+                paidAmount: 31211,
+                balanceDue: 0,
+                notes: 'Delivered at Kukatpally Site'
             }
         ];
 
         // State variables
+        let currentUser = null;
         let inventory = [];
         let sales = [];
-        let khataPayments = []; // { id, customerName, date, amount, method, note }
+        let khataPayments = [];
         let currentPosLines = [];
         let activeInvCategory = 'All';
+        let activePosCatalogCategory = 'All';
+        let inventoryViewMode = 'table';
         let salesTrendChartInstance = null;
         let categoryShareChartInstance = null;
         let activeReportFilter = 'today';
         let activeKhataCustomer = null;
+
+        // User accounts definition
+        const STAFF_ACCOUNTS = [
+            { username: 'admin', pin: '1234', pass: 'admin123', name: 'Sarda (Owner)', role: 'admin', avatar: 'S' },
+            { username: 'cashier', pin: '5678', pass: 'cashier123', name: 'Ramesh Kumar (Billing)', role: 'cashier', avatar: 'RK' },
+            { username: 'stock', pin: '9999', pass: 'stock123', name: 'Venkatesh (Godown Mgr)', role: 'stock', avatar: 'VG' }
+        ];
 
         function getTodayDateString() {
             const d = new Date();
@@ -1022,12 +1483,23 @@
             return `${year}-${month}-${day}`;
         }
 
-        // Initialize Data from LocalStorage
+        // =========================================================================
+        // INITIALIZATION & STORAGE
+        // =========================================================================
         function initData() {
-            const savedInv = localStorage.getItem('aquapro_inventory');
-            const savedSales = localStorage.getItem('aquapro_sales');
-            const savedKhataPay = localStorage.getItem('aquapro_khata_payments');
+            // Load Auth
+            const savedUser = localStorage.getItem('karni_current_user') || localStorage.getItem('sarda_current_user');
+            if (savedUser) {
+                const parsed = JSON.parse(savedUser);
+                const matched = STAFF_ACCOUNTS.find(a => a.username === parsed.username || a.role === parsed.role);
+                currentUser = matched || parsed;
+                applyUserSession();
+            } else {
+                showAuthScreen();
+            }
 
+            // Load Inventory
+            const savedInv = localStorage.getItem('karni_inventory') || localStorage.getItem('sarda_inventory');
             if (savedInv) {
                 inventory = JSON.parse(savedInv);
             } else {
@@ -1035,6 +1507,8 @@
                 saveInventory();
             }
 
+            // Load Sales
+            const savedSales = localStorage.getItem('karni_sales') || localStorage.getItem('sarda_sales');
             if (savedSales) {
                 sales = JSON.parse(savedSales);
             } else {
@@ -1042,27 +1516,30 @@
                 saveSales();
             }
 
+            // Load Khata Payments
+            const savedKhataPay = localStorage.getItem('karni_khata_payments') || localStorage.getItem('sarda_khata_payments');
             if (savedKhataPay) {
                 khataPayments = JSON.parse(savedKhataPay);
             } else {
                 khataPayments = [];
                 saveKhataPayments();
             }
+
+            renderPresetGallery();
         }
 
         function saveInventory() {
-            localStorage.setItem('aquapro_inventory', JSON.stringify(inventory));
+            localStorage.setItem('karni_inventory', JSON.stringify(inventory));
         }
 
         function saveSales() {
-            localStorage.setItem('aquapro_sales', JSON.stringify(sales));
+            localStorage.setItem('karni_sales', JSON.stringify(sales));
         }
 
         function saveKhataPayments() {
-            localStorage.setItem('aquapro_khata_payments', JSON.stringify(khataPayments));
+            localStorage.setItem('karni_khata_payments', JSON.stringify(khataPayments));
         }
 
-        // Formatter Helper
         function formatINR(amount) {
             return new Intl.NumberFormat('en-IN', {
                 style: 'currency',
@@ -1071,15 +1548,15 @@
             }).format(Number(amount) || 0);
         }
 
-        // Toast
+        // Toast notifications
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            toast.className = `px-4 py-3 rounded-2xl shadow-xl border text-xs font-bold flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto ${
-                type === 'success' ? 'bg-slate-900 text-white border-teal-500/40' : 'bg-rose-900 text-white border-rose-500/40'
+            toast.className = `px-4 py-3 rounded-2xl shadow-2xl border text-xs font-bold flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto ${
+                type === 'success' ? 'bg-slate-900 text-white border-teal-500/50' : 'bg-rose-950 text-white border-rose-500/50'
             }`;
             toast.innerHTML = `
-                <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-4 h-4 text-teal-400"></i>
+                <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" class="w-4 h-4 ${type === 'success' ? 'text-teal-400' : 'text-rose-400'}"></i>
                 <span>${message}</span>
             `;
             container.appendChild(toast);
@@ -1092,10 +1569,89 @@
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
                 setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            }, 3200);
         }
 
-        // Switch App Views
+        // =========================================================================
+        // AUTHENTICATION & ROLE MANAGEMENT
+        // =========================================================================
+        function showAuthScreen() {
+            document.getElementById('authScreen').classList.remove('hidden');
+        }
+
+        function quickLoginRole(roleKey) {
+            const acc = STAFF_ACCOUNTS.find(a => a.role === roleKey);
+            if (acc) {
+                currentUser = acc;
+                localStorage.setItem('karni_current_user', JSON.stringify(currentUser));
+                applyUserSession();
+                showToast(`Welcome to KARNI BUILTMART, ${acc.name}!`);
+            }
+        }
+
+        function handleManualLogin(e) {
+            e.preventDefault();
+            const userVal = document.getElementById('loginUsername').value.trim().toLowerCase();
+            const passVal = document.getElementById('loginPassword').value.trim();
+
+            const found = STAFF_ACCOUNTS.find(a => 
+                (a.username.toLowerCase() === userVal || a.role.toLowerCase() === userVal) &&
+                (a.pass === passVal || a.pin === passVal)
+            );
+
+            if (found) {
+                currentUser = found;
+                localStorage.setItem('karni_current_user', JSON.stringify(currentUser));
+                document.getElementById('loginErrorMsg').classList.add('hidden');
+                applyUserSession();
+                showToast(`Signed in as ${found.name}`);
+            } else {
+                document.getElementById('loginErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        function applyUserSession() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('lockScreen').classList.add('hidden');
+
+            if (currentUser) {
+                document.getElementById('headerUserName').innerText = currentUser.name;
+                document.getElementById('headerUserRole').innerText = currentUser.role === 'admin' ? 'Owner (Admin)' : (currentUser.role === 'cashier' ? 'Billing Counter' : 'Godown Manager');
+                document.getElementById('headerUserAvatar').innerText = currentUser.avatar || 'S';
+            }
+        }
+
+        function lockScreenNow() {
+            if (!currentUser) return;
+            document.getElementById('lockedUserName').innerText = currentUser.name;
+            document.getElementById('lockedUserRole').innerText = currentUser.role.toUpperCase();
+            document.getElementById('unlockPinInput').value = '';
+            document.getElementById('unlockErrorMsg').classList.add('hidden');
+            document.getElementById('lockScreen').classList.remove('hidden');
+        }
+
+        function handleUnlockScreen(e) {
+            e.preventDefault();
+            const pinVal = document.getElementById('unlockPinInput').value.trim();
+            if (currentUser && (pinVal === currentUser.pin || pinVal === currentUser.pass)) {
+                document.getElementById('lockScreen').classList.add('hidden');
+                showToast("Screen unlocked!");
+            } else {
+                document.getElementById('unlockErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        function performLogout() {
+            currentUser = null;
+            localStorage.removeItem('karni_current_user');
+            document.getElementById('lockScreen').classList.add('hidden');
+            showAuthScreen();
+            showToast("Logged out of KARNI BUILTMART.");
+        }
+
+        // =========================================================================
+        // VIEW NAVIGATION
+        // =========================================================================
         function switchView(viewId) {
             document.querySelectorAll('.app-view').forEach(el => el.classList.add('hidden'));
             const target = document.getElementById('view-' + viewId);
@@ -1116,6 +1672,7 @@
                 renderDashboard();
             } else if (viewId === 'pos') {
                 initPosForm();
+                renderPosCatalog();
             } else if (viewId === 'inventory') {
                 renderInventoryTable();
             } else if (viewId === 'khata') {
@@ -1126,7 +1683,7 @@
         }
 
         // =========================================================================
-        // DASHBOARD RENDER LOGIC
+        // DASHBOARD LOGIC
         // =========================================================================
         function renderDashboard() {
             const todayStr = getTodayDateString();
@@ -1161,7 +1718,7 @@
             document.getElementById('kpiTotalKhataDue').innerText = formatINR(totalPendingKhata);
             document.getElementById('kpiKhataCustomersCount').innerText = `${khataAccountsCount} accounts`;
             document.getElementById('kpiStockValuation').innerText = formatINR(totalStockValue);
-            document.getElementById('kpiStockItemsCount').innerText = `${totalStockItemsCount} items in stock`;
+            document.getElementById('kpiStockItemsCount').innerText = `${totalStockItemsCount} units/bags`;
 
             renderRecentSalesTable();
             renderLowStockAlerts();
@@ -1175,7 +1732,7 @@
             const sorted = [...sales].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
             if (sorted.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">No sales recorded yet. Click + Quick Sale to create your first bill!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">No sales recorded today. Click + Quick Sale to create your first dispatch invoice!</td></tr>`;
                 return;
             }
 
@@ -1185,8 +1742,8 @@
 
                 const isCredit = s.balanceDue > 0;
                 const statusBadge = isCredit 
-                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Pending Due: ${formatINR(s.balanceDue)}</span>`
-                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Fully Paid</span>`;
+                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Due: ${formatINR(s.balanceDue)}</span>`
+                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Paid Full</span>`;
 
                 tr.innerHTML = `
                     <td class="py-2.5 px-3">
@@ -1195,7 +1752,7 @@
                     </td>
                     <td class="py-2.5 px-3">
                         <span class="font-bold text-slate-800 block">${s.customerName}</span>
-                        <span class="text-[10px] text-slate-400">${s.customerPhone || 'Walk-in'}</span>
+                        <span class="text-[10px] text-slate-400">${s.customerPhone || 'Hyderabad Site'}</span>
                     </td>
                     <td class="py-2.5 px-3 font-semibold text-slate-600">${s.items.length} items</td>
                     <td class="py-2.5 px-3 font-bold text-slate-900 mono">${formatINR(s.grandTotal)}</td>
@@ -1203,7 +1760,7 @@
                         ${statusBadge}
                     </td>
                     <td class="py-2.5 px-3 text-right">
-                        <button onclick="previewInvoice('${s.invoiceNo}')" class="p-1 text-slate-500 hover:text-teal-600 rounded transition" title="Print Invoice">
+                        <button onclick="previewInvoice('${s.invoiceNo}')" class="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-slate-100 rounded-lg transition" title="Print Invoice">
                             <i data-lucide="printer" class="w-4 h-4"></i>
                         </button>
                     </td>
@@ -1231,7 +1788,7 @@
                 container.innerHTML = `
                     <div class="py-8 text-center text-slate-400">
                         <i data-lucide="check-circle" class="w-8 h-8 text-teal-400 mx-auto mb-1"></i>
-                        <p class="text-xs font-bold text-slate-600">All products well-stocked!</p>
+                        <p class="text-xs font-bold text-slate-600">All cement & materials well stocked!</p>
                     </div>
                 `;
                 lucide.createIcons();
@@ -1240,16 +1797,20 @@
 
             lowItems.forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'py-2 flex items-center justify-between';
+                div.className = 'py-2 flex items-center justify-between gap-2';
                 div.innerHTML = `
-                    <div>
-                        <span class="font-bold text-slate-900 text-xs block">${item.name}</span>
-                        <span class="text-[10px] text-slate-400">${item.category}</span>
+                    <div class="flex items-center gap-2">
+                        <img src="${item.image || PRESET_PRODUCT_IMAGES[0].url}" alt="" class="w-8 h-8 rounded-lg object-cover bg-slate-100 shrink-0">
+                        <div>
+                            <span class="font-bold text-slate-900 text-xs block leading-tight">${item.name}</span>
+                            <span class="text-[10px] text-slate-400">${item.brand} • ${item.size || ''}</span>
+                        </div>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right shrink-0">
                         <span class="px-2 py-0.5 rounded text-[10px] font-black bg-rose-100 text-rose-700 mono block">
                             ${item.stock} / ${item.minStock} ${item.unit}
                         </span>
+                        <button onclick="quickAddStock('${item.id}')" class="text-[10px] font-bold text-teal-700 hover:underline mt-0.5 block">+ Inward</button>
                     </div>
                 `;
                 container.appendChild(div);
@@ -1315,26 +1876,26 @@
             });
 
             // Category Share
-            let cpvcTotal = 0;
-            let cpTotal = 0;
-            let otherTotal = 0;
+            let cementTotal = 0;
+            let pipesTotal = 0;
+            let othersTotal = 0;
 
             sales.forEach(s => {
                 s.items.forEach(item => {
                     const prod = inventory.find(p => p.id === item.productId);
-                    if (prod && prod.category.includes('CPVC')) {
-                        cpvcTotal += item.total;
-                    } else if (prod && prod.category.includes('CP Bathroom')) {
-                        cpTotal += item.total;
+                    if (prod && prod.category.includes('Cement')) {
+                        cementTotal += item.total;
+                    } else if (prod && (prod.category.includes('CPVC') || prod.category.includes('Bathroom'))) {
+                        pipesTotal += item.total;
                     } else {
-                        otherTotal += item.total;
+                        othersTotal += item.total;
                     }
                 });
             });
 
-            const totalCat = (cpvcTotal + cpTotal + otherTotal) || 1;
-            document.getElementById('statCpShare').innerText = ((cpTotal / totalCat) * 100).toFixed(0) + '%';
-            document.getElementById('statCpvcShare').innerText = ((cpvcTotal / totalCat) * 100).toFixed(0) + '%';
+            const totalCat = (cementTotal + pipesTotal + othersTotal) || 1;
+            document.getElementById('statCpShare').innerText = ((cementTotal / totalCat) * 100).toFixed(0) + '%';
+            document.getElementById('statCpvcShare').innerText = ((pipesTotal / totalCat) * 100).toFixed(0) + '%';
 
             const ctxCat = document.getElementById('categoryShareChart').getContext('2d');
             if (categoryShareChartInstance) categoryShareChartInstance.destroy();
@@ -1342,10 +1903,10 @@
             categoryShareChartInstance = new Chart(ctxCat, {
                 type: 'doughnut',
                 data: {
-                    labels: ['CPVC Pipes & Fittings', 'CP Bathroom Taps', 'Valves & Solvents'],
+                    labels: ['Cement Bags', 'Pipes & CP Fittings', 'Putty & Chemicals'],
                     datasets: [{
-                        data: [cpvcTotal || 1, cpTotal || 1, otherTotal || 0.5],
-                        backgroundColor: ['#3b82f6', '#0d9488', '#f59e0b'],
+                        data: [cementTotal || 1, pipesTotal || 1, othersTotal || 0.5],
+                        backgroundColor: ['#f59e0b', '#0d9488', '#3b82f6'],
                         borderWidth: 2,
                         borderColor: '#ffffff'
                     }]
@@ -1362,10 +1923,10 @@
         }
 
         // =========================================================================
-        // POS / BILLING LOGIC
+        // POS / BILLING & VISUAL PRODUCT CATALOG
         // =========================================================================
         function initPosForm() {
-            const nextInvoiceNumber = 'INV-2026-' + String(sales.length + 1).padStart(4, '0');
+            const nextInvoiceNumber = 'KB-2026-' + String(sales.length + 1).padStart(4, '0');
             document.getElementById('posInvoiceNo').innerText = nextInvoiceNumber;
             document.getElementById('posInvoiceDate').value = getTodayDateString();
             document.getElementById('posCustomerName').value = '';
@@ -1375,8 +1936,99 @@
             document.getElementById('posPaymentMode').value = 'Cash';
 
             currentPosLines = [];
-            addPosLineItem(); // add 1 blank line
+            addPosLineItem();
             calculatePosTotals();
+        }
+
+        function setPosCatalogCat(cat) {
+            activePosCatalogCategory = cat;
+            document.querySelectorAll('.pos-cat-btn').forEach(btn => {
+                if (btn.innerText === cat || (cat === 'All' && btn.innerText === 'All')) {
+                    btn.className = 'pos-cat-btn active-pos-cat px-2.5 py-1 rounded-lg font-bold bg-slate-900 text-white whitespace-nowrap';
+                } else {
+                    btn.className = 'pos-cat-btn px-2.5 py-1 rounded-lg font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 whitespace-nowrap';
+                }
+            });
+            renderPosCatalog();
+        }
+
+        function renderPosCatalog() {
+            const grid = document.getElementById('posCatalogGrid');
+            grid.innerHTML = '';
+
+            const query = (document.getElementById('posCatalogSearch').value || '').toLowerCase();
+            const filtered = inventory.filter(item => {
+                const matchCat = (activePosCatalogCategory === 'All' || item.category === activePosCatalogCategory);
+                const matchQuery = item.name.toLowerCase().includes(query) || (item.brand && item.brand.toLowerCase().includes(query)) || (item.size && item.size.toLowerCase().includes(query));
+                return matchCat && matchQuery;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 text-xs">No products found.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50 hover:bg-amber-50/60 border border-slate-200 hover:border-amber-400 p-2.5 rounded-2xl cursor-pointer transition flex flex-col justify-between group shadow-2xs";
+                card.onclick = () => addProductToPosBill(item.id);
+
+                const isLow = item.stock <= item.minStock;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="w-full h-20 rounded-xl bg-white overflow-hidden relative mb-2 border border-slate-100">
+                            <img src="${item.image || PRESET_PRODUCT_IMAGES[0].url}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200">
+                            <span class="absolute top-1 right-1 text-[9px] font-black px-1.5 py-0.2 rounded-md ${isLow ? 'bg-rose-500 text-white' : 'bg-slate-900/80 text-white'}">
+                                ${item.stock} ${item.unit}
+                            </span>
+                        </div>
+                        <span class="text-[9px] font-bold text-amber-700 uppercase tracking-wider block">${item.brand}</span>
+                        <h5 class="text-xs font-bold text-slate-900 leading-tight line-clamp-2">${item.name}</h5>
+                    </div>
+                    <div class="mt-2 pt-1 border-t border-slate-200 flex items-center justify-between">
+                        <span class="text-xs font-black text-slate-900 mono">${formatINR(item.sellPrice)}</span>
+                        <span class="w-5 h-5 rounded-lg bg-teal-600 group-hover:bg-teal-500 text-white flex items-center justify-center font-bold text-xs">+</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function addProductToPosBill(productId) {
+            const prod = inventory.find(p => p.id === productId);
+            if (!prod) return;
+
+            const existingLine = currentPosLines.find(l => l.productId === productId);
+            if (existingLine) {
+                existingLine.qty += 1;
+                recomputeLineTotal(existingLine);
+                renderPosLines();
+                calculatePosTotals();
+                showToast(`+1 ${prod.name} added to bill`);
+                return;
+            }
+
+            if (currentPosLines.length === 1 && (!currentPosLines[0].productId || currentPosLines[0].qty === 0)) {
+                currentPosLines[0].productId = prod.id;
+                currentPosLines[0].rate = prod.sellPrice;
+                currentPosLines[0].qty = 1;
+                recomputeLineTotal(currentPosLines[0]);
+            } else {
+                const lineId = 'line_' + Date.now() + Math.random().toString(36).substr(2, 4);
+                currentPosLines.push({
+                    lineId,
+                    productId: prod.id,
+                    qty: 1,
+                    rate: prod.sellPrice,
+                    disc: 0,
+                    total: prod.sellPrice
+                });
+            }
+
+            renderPosLines();
+            calculatePosTotals();
+            showToast(`${prod.name} added!`);
         }
 
         function addPosLineItem() {
@@ -1406,35 +2058,40 @@
         function renderPosLines() {
             const tbody = document.getElementById('posLineItemsBody');
             tbody.innerHTML = '';
+            document.getElementById('posItemsCountBadge').innerText = currentPosLines.length;
 
             currentPosLines.forEach((line, idx) => {
                 const prod = inventory.find(p => p.id === line.productId) || inventory[0];
                 const tr = document.createElement('tr');
+                tr.id = `pos-row-${line.lineId}`;
                 tr.className = 'hover:bg-slate-50';
 
                 tr.innerHTML = `
-                    <td class="py-2.5 px-3 font-bold text-slate-400 text-center">${idx + 1}</td>
-                    <td class="py-2.5 px-3">
-                        <select onchange="updatePosLineProduct('${line.lineId}', this.value)" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-teal-500">
-                            ${inventory.map(p => `<option value="${p.id}" ${p.id === line.productId ? 'selected' : ''}>${p.name} (${p.category})</option>`).join('')}
-                        </select>
+                    <td class="py-2 px-3 font-bold text-slate-400 text-center">${idx + 1}</td>
+                    <td class="py-2 px-3">
+                        <div class="flex items-center gap-2">
+                            <img id="pos-line-img-${line.lineId}" src="${prod ? (prod.image || PRESET_PRODUCT_IMAGES[0].url) : PRESET_PRODUCT_IMAGES[0].url}" alt="" class="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0">
+                            <select onchange="updatePosLineProduct('${line.lineId}', this.value)" class="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-teal-500">
+                                ${inventory.map(p => `<option value="${p.id}" ${p.id === line.productId ? 'selected' : ''}>${p.name} [${p.brand}] - ₹${p.sellPrice}</option>`).join('')}
+                            </select>
+                        </div>
                     </td>
-                    <td class="py-2.5 px-3">
-                        <span class="font-bold text-slate-700 mono">${prod ? prod.stock : 0} ${prod ? prod.unit : ''}</span>
+                    <td class="py-2 px-3">
+                        <span id="pos-line-stock-${line.lineId}" class="font-bold text-slate-700 mono">${prod ? prod.stock : 0} ${prod ? prod.unit : ''}</span>
                     </td>
-                    <td class="py-2.5 px-3">
-                        <input type="number" min="1" value="${line.qty}" oninput="updatePosLineQty('${line.lineId}', this.value)" class="w-20 px-2 py-1 bg-white border border-slate-300 rounded-lg font-bold mono text-xs">
+                    <td class="py-2 px-3">
+                        <input type="number" id="pos-line-qty-${line.lineId}" min="1" value="${line.qty}" onfocus="this.select()" oninput="updatePosLineQty('${line.lineId}', this.value)" class="w-16 px-2 py-1 bg-white border border-slate-300 rounded-lg font-bold mono text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none">
                     </td>
-                    <td class="py-2.5 px-3">
-                        <input type="number" min="0" step="0.5" value="${line.rate}" oninput="updatePosLineRate('${line.lineId}', this.value)" class="w-24 px-2 py-1 bg-white border border-slate-300 rounded-lg font-bold mono text-xs">
+                    <td class="py-2 px-3">
+                        <input type="number" id="pos-line-rate-${line.lineId}" min="0" step="1" value="${line.rate}" onfocus="this.select()" oninput="updatePosLineRate('${line.lineId}', this.value)" class="w-20 px-2 py-1 bg-white border border-slate-300 rounded-lg font-bold mono text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none">
                     </td>
-                    <td class="py-2.5 px-3">
-                        <input type="number" min="0" max="100" value="${line.disc}" oninput="updatePosLineDisc('${line.lineId}', this.value)" class="w-16 px-2 py-1 bg-white border border-slate-300 rounded-lg font-bold mono text-xs" placeholder="0">
+                    <td class="py-2 px-3">
+                        <input type="number" id="pos-line-disc-${line.lineId}" min="0" max="100" value="${line.disc}" onfocus="this.select()" oninput="updatePosLineDisc('${line.lineId}', this.value)" class="w-14 px-2 py-1 bg-white border border-slate-300 rounded-lg font-bold mono text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none" placeholder="0">
                     </td>
-                    <td class="py-2.5 px-3 text-right font-black text-slate-900 mono">
+                    <td id="pos-line-total-${line.lineId}" class="py-2 px-3 text-right font-black text-slate-900 mono">
                         ${formatINR(line.total)}
                     </td>
-                    <td class="py-2.5 px-3 text-center">
+                    <td class="py-2 px-3 text-center">
                         <button type="button" onclick="removePosLineItem('${line.lineId}')" class="text-slate-400 hover:text-rose-600 p-1">
                             <i data-lucide="trash-2" class="w-4 h-4"></i>
                         </button>
@@ -1453,7 +2110,20 @@
                 line.productId = productId;
                 line.rate = prod.sellPrice;
                 recomputeLineTotal(line);
-                renderPosLines();
+                
+                // Update UI elements in place without resetting focus or destroying table
+                const imgEl = document.getElementById('pos-line-img-' + lineId);
+                if (imgEl) imgEl.src = prod.image || PRESET_PRODUCT_IMAGES[0].url;
+
+                const stockEl = document.getElementById('pos-line-stock-' + lineId);
+                if (stockEl) stockEl.innerText = `${prod.stock} ${prod.unit}`;
+
+                const rateInput = document.getElementById('pos-line-rate-' + lineId);
+                if (rateInput) rateInput.value = prod.sellPrice;
+
+                const totalEl = document.getElementById('pos-line-total-' + lineId);
+                if (totalEl) totalEl.innerText = formatINR(line.total);
+
                 calculatePosTotals();
             }
         }
@@ -1461,9 +2131,10 @@
         function updatePosLineQty(lineId, val) {
             const line = currentPosLines.find(l => l.lineId === lineId);
             if (line) {
-                line.qty = Math.max(1, parseFloat(val) || 1);
+                line.qty = parseFloat(val) || 0;
                 recomputeLineTotal(line);
-                renderPosLines();
+                const totalEl = document.getElementById('pos-line-total-' + lineId);
+                if (totalEl) totalEl.innerText = formatINR(line.total);
                 calculatePosTotals();
             }
         }
@@ -1471,9 +2142,10 @@
         function updatePosLineRate(lineId, val) {
             const line = currentPosLines.find(l => l.lineId === lineId);
             if (line) {
-                line.rate = Math.max(0, parseFloat(val) || 0);
+                line.rate = parseFloat(val) || 0;
                 recomputeLineTotal(line);
-                renderPosLines();
+                const totalEl = document.getElementById('pos-line-total-' + lineId);
+                if (totalEl) totalEl.innerText = formatINR(line.total);
                 calculatePosTotals();
             }
         }
@@ -1483,7 +2155,8 @@
             if (line) {
                 line.disc = Math.min(100, Math.max(0, parseFloat(val) || 0));
                 recomputeLineTotal(line);
-                renderPosLines();
+                const totalEl = document.getElementById('pos-line-total-' + lineId);
+                if (totalEl) totalEl.innerText = formatINR(line.total);
                 calculatePosTotals();
             }
         }
@@ -1530,7 +2203,7 @@
         function saveSalesBill(andPrint = false) {
             const customerName = (document.getElementById('posCustomerName').value || '').trim();
             if (!customerName) {
-                showToast("Please enter customer / contractor name!", "error");
+                showToast("Please enter customer / contractor name or site!", "error");
                 document.getElementById('posCustomerName').focus();
                 return;
             }
@@ -1589,75 +2262,39 @@
             sales.unshift(billRecord);
             saveSales();
 
-            showToast(`Sales Bill ${invoiceNo} saved successfully!`);
+            showToast(`Invoice ${invoiceNo} generated for ${customerName}!`);
 
             if (andPrint) {
                 previewInvoice(invoiceNo);
             }
 
             initPosForm();
+            renderPosCatalog();
         }
 
         // =========================================================================
-        // INVENTORY MANAGEMENT
+        // INVENTORY MANAGEMENT (ADD, EDIT, RESTOCK, IMAGES)
         // =========================================================================
-        function renderInventoryTable() {
-            const tbody = document.getElementById('inventoryTableBody');
-            tbody.innerHTML = '';
-
-            const query = (document.getElementById('inventorySearchInput').value || '').toLowerCase();
-            const filtered = inventory.filter(item => {
-                const matchCat = (activeInvCategory === 'All' || item.category === activeInvCategory);
-                const matchQuery = item.name.toLowerCase().includes(query) || (item.hsn && item.hsn.includes(query));
-                return matchCat && matchQuery;
-            });
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">No products found matching filter.</td></tr>`;
-                return;
+        function setInventoryViewMode(mode) {
+            inventoryViewMode = mode;
+            if (mode === 'grid') {
+                document.getElementById('inventoryTableView').classList.add('hidden');
+                document.getElementById('inventoryGridView').classList.remove('hidden');
+                document.getElementById('invModeGridBtn').className = 'p-1.5 rounded-lg bg-white shadow-xs text-teal-700 font-bold';
+                document.getElementById('invModeTableBtn').className = 'p-1.5 rounded-lg text-slate-600 hover:text-slate-900';
+            } else {
+                document.getElementById('inventoryTableView').classList.remove('hidden');
+                document.getElementById('inventoryGridView').classList.add('hidden');
+                document.getElementById('invModeTableBtn').className = 'p-1.5 rounded-lg bg-white shadow-xs text-teal-700 font-bold';
+                document.getElementById('invModeGridBtn').className = 'p-1.5 rounded-lg text-slate-600 hover:text-slate-900';
             }
-
-            filtered.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition';
-
-                const isLow = item.stock <= item.minStock;
-                const statusBadge = isLow 
-                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-black bg-rose-100 text-rose-700">Low Stock</span>`
-                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">In Stock</span>`;
-
-                const totalVal = item.stock * item.costPrice;
-
-                tr.innerHTML = `
-                    <td class="py-3 px-4">
-                        <span class="font-bold text-slate-900 block">${item.name}</span>
-                        <span class="text-[10px] text-slate-400 mono">HSN: ${item.hsn || 'N/A'} • Unit: ${item.unit}</span>
-                    </td>
-                    <td class="py-3 px-4">
-                        <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded">${item.category}</span>
-                    </td>
-                    <td class="py-3 px-4 font-black mono text-slate-900">${item.stock} ${item.unit}</td>
-                    <td class="py-3 px-4 mono text-slate-500">${formatINR(item.costPrice)}</td>
-                    <td class="py-3 px-4 mono font-bold text-teal-700">${formatINR(item.sellPrice)}</td>
-                    <td class="py-3 px-4 mono font-semibold text-slate-800">${formatINR(totalVal)}</td>
-                    <td class="py-3 px-4">${statusBadge}</td>
-                    <td class="py-3 px-4 text-right">
-                        <button onclick="quickAddStock('${item.id}')" class="px-2 py-1 bg-slate-100 hover:bg-teal-50 text-teal-700 rounded font-bold text-[11px] mr-1" title="Add Stock">+ Stock</button>
-                        <button onclick="deleteProduct('${item.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            lucide.createIcons();
+            renderInventoryTable();
         }
 
         function filterInventoryCategory(cat) {
             activeInvCategory = cat;
             document.querySelectorAll('.inv-filter').forEach(btn => {
-                if (btn.innerText === cat || (cat === 'All' && btn.innerText === 'All Items')) {
+                if (btn.innerText === cat || (cat === 'All' && btn.innerText === 'All')) {
                     btn.className = 'inv-filter active-inv-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition';
                 } else {
                     btn.className = 'inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
@@ -1666,64 +2303,408 @@
             renderInventoryTable();
         }
 
-        function filterInventory() {
-            renderInventoryTable();
+        function renderInventoryTable() {
+            const query = (document.getElementById('inventorySearchInput').value || '').toLowerCase();
+            const brandFilter = document.getElementById('inventoryBrandFilter').value;
+
+            const filtered = inventory.filter(item => {
+                const matchCat = (activeInvCategory === 'All' || item.category === activeInvCategory);
+                const matchBrand = (brandFilter === 'All' || item.brand.toLowerCase().includes(brandFilter.toLowerCase()));
+                const matchQuery = item.name.toLowerCase().includes(query) || 
+                                   (item.hsn && item.hsn.includes(query)) || 
+                                   (item.location && item.location.toLowerCase().includes(query)) ||
+                                   (item.size && item.size.toLowerCase().includes(query));
+                return matchCat && matchBrand && matchQuery;
+            });
+
+            // 1. Render Table Body
+            const tbody = document.getElementById('inventoryTableBody');
+            tbody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-400">No products found matching filter.</td></tr>`;
+            } else {
+                filtered.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition';
+
+                    const isLow = item.stock <= item.minStock;
+                    const totalVal = item.stock * item.costPrice;
+
+                    tr.innerHTML = `
+                        <td class="py-3 px-4">
+                            <div class="flex items-center gap-3">
+                                <img src="${item.image || PRESET_PRODUCT_IMAGES[0].url}" alt="${item.name}" class="w-10 h-10 rounded-xl object-cover border border-slate-200 bg-slate-100 shrink-0">
+                                <div>
+                                    <span class="font-bold text-slate-900 block">${item.name}</span>
+                                    <span class="text-[10px] text-slate-400 mono">HSN: ${item.hsn || '2523'} • Unit: ${item.unit}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="font-bold text-amber-700 block">${item.brand}</span>
+                            <span class="text-[10px] text-slate-500">${item.category}</span>
+                        </td>
+                        <td class="py-3 px-3 font-semibold text-slate-700">${item.size || 'PPC'}</td>
+                        <td class="py-3 px-3 font-medium text-slate-500">${item.location || 'Godown'}</td>
+                        <td class="py-3 px-3">
+                            <span class="font-black mono ${isLow ? 'text-rose-600' : 'text-slate-900'}">${item.stock} ${item.unit}</span>
+                            ${isLow ? '<span class="block text-[9px] font-bold text-rose-500">Low Buffer</span>' : ''}
+                        </td>
+                        <td class="py-3 px-3 mono text-slate-500">${formatINR(item.costPrice)}</td>
+                        <td class="py-3 px-3 mono font-bold text-teal-700">${formatINR(item.sellPrice)}</td>
+                        <td class="py-3 px-3 mono font-semibold text-slate-800">${formatINR(totalVal)}</td>
+                        <td class="py-3 px-4 text-right whitespace-nowrap">
+                            <button onclick="quickAddStock('${item.id}')" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-lg font-bold text-[11px] mr-1" title="Inward Stock">+ Stock</button>
+                            <button onclick="openAddStockModal('${item.id}')" class="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-slate-100 rounded-lg mr-1" title="Edit Product">
+                                <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="deleteProduct('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg" title="Delete Product">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // 2. Render Cards Grid View
+            const grid = document.getElementById('inventoryGridView');
+            grid.innerHTML = '';
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs hover:shadow-md transition flex flex-col justify-between space-y-3";
+
+                const isLow = item.stock <= item.minStock;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="w-full h-36 rounded-2xl bg-slate-100 overflow-hidden relative mb-3 border border-slate-100">
+                            <img src="${item.image || PRESET_PRODUCT_IMAGES[0].url}" alt="${item.name}" class="w-full h-full object-cover">
+                            <span class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-black ${isLow ? 'bg-rose-600 text-white' : 'bg-slate-900/80 text-white'}">
+                                ${item.stock} ${item.unit}
+                            </span>
+                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/90 text-amber-900 shadow-xs">
+                                ${item.brand}
+                            </span>
+                        </div>
+
+                        <h4 class="font-bold text-slate-900 text-xs line-clamp-2 leading-tight">${item.name}</h4>
+                        <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
+                            <span>${item.size || ''}</span>
+                            <span>Loc: ${item.location || 'Godown'}</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-100 text-xs">
+                            <div>
+                                <span class="text-[10px] text-slate-400 block">Retail Rate</span>
+                                <span class="font-bold text-teal-700 mono">${formatINR(item.sellPrice)}</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 block">Purchase Cost</span>
+                                <span class="font-semibold text-slate-600 mono">${formatINR(item.costPrice)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
+                        <button onclick="quickAddStock('${item.id}')" class="flex-1 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold rounded-xl text-xs flex items-center justify-center gap-1">
+                            <i data-lucide="plus" class="w-3 h-3"></i> + Stock
+                        </button>
+                        <button onclick="openAddStockModal('${item.id}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl">
+                            <i data-lucide="edit" class="w-3.5 h-3.5"></i>
+                        </button>
+                        <button onclick="deleteProduct('${item.id}')" class="p-1.5 bg-slate-100 hover:bg-rose-100 text-slate-400 hover:text-rose-600 rounded-xl">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            lucide.createIcons();
         }
 
-        function quickAddStock(productId) {
-            const item = inventory.find(p => p.id === productId);
-            if (!item) return;
-            const added = prompt(`Add incoming stock quantity for "${item.name}":`, "10");
-            if (added && !isNaN(added)) {
-                item.stock += parseInt(added);
-                saveInventory();
-                renderInventoryTable();
-                showToast(`Updated ${item.name} stock (+${added})`);
+        // =========================================================================
+        // PRODUCT MODAL (ADD & EDIT)
+        // =========================================================================
+        function handleProdBrandChange() {
+            const sel = document.getElementById('prodBrand').value;
+            const customInput = document.getElementById('prodCustomBrand');
+            if (sel === 'Custom') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
             }
         }
 
-        function deleteProduct(productId) {
-            if (confirm("Are you sure you want to delete this product from inventory?")) {
-                inventory = inventory.filter(p => p.id !== productId);
-                saveInventory();
-                renderInventoryTable();
-                showToast("Product deleted from stock.");
+        function openAddStockModal(productId = null) {
+            const modal = document.getElementById('addStockModal');
+            const title = document.getElementById('addStockModalTitle');
+            const editIdInput = document.getElementById('prodEditId');
+            const brandSel = document.getElementById('prodBrand');
+            const customBrandInput = document.getElementById('prodCustomBrand');
+
+            if (productId) {
+                const prod = inventory.find(p => p.id === productId);
+                if (!prod) return;
+
+                title.innerText = `Edit: ${prod.name}`;
+                editIdInput.value = prod.id;
+                document.getElementById('prodName').value = prod.name;
+                
+                const matchOpt = Array.from(brandSel.options).find(o => o.value === prod.brand);
+                if (matchOpt) {
+                    brandSel.value = prod.brand;
+                    customBrandInput.classList.add('hidden');
+                    customBrandInput.value = '';
+                } else {
+                    brandSel.value = 'Custom';
+                    customBrandInput.classList.remove('hidden');
+                    customBrandInput.value = prod.brand || '';
+                }
+
+                document.getElementById('prodCategory').value = prod.category;
+                document.getElementById('prodSize').value = prod.size || 'PPC (Portland Pozzolana)';
+                document.getElementById('prodUnit').value = prod.unit;
+                document.getElementById('prodStock').value = prod.stock;
+                document.getElementById('prodCost').value = prod.costPrice;
+                document.getElementById('prodPrice').value = prod.sellPrice;
+                document.getElementById('prodWholesale').value = prod.wholesalePrice || prod.sellPrice;
+                document.getElementById('prodMinStock').value = prod.minStock;
+                document.getElementById('prodLocation').value = prod.location || '';
+                document.getElementById('prodHsn').value = prod.hsn || '2523';
+                
+                updateImagePreviewFromUrl(prod.image || PRESET_PRODUCT_IMAGES[0].url);
+            } else {
+                title.innerText = "Add New Cement / Material to KARNI BUILTMART";
+                editIdInput.value = "";
+                document.getElementById('prodName').value = "";
+                brandSel.value = "Unbranded / None";
+                customBrandInput.classList.add('hidden');
+                customBrandInput.value = "";
+                document.getElementById('prodCategory').value = "Cement Bags (50kg)";
+                document.getElementById('prodSize').value = "PPC (Portland Pozzolana)";
+                document.getElementById('prodUnit').value = "Bags (50kg)";
+                document.getElementById('prodStock').value = "200";
+                document.getElementById('prodCost').value = "340";
+                document.getElementById('prodPrice').value = "385";
+                document.getElementById('prodWholesale').value = "365";
+                document.getElementById('prodMinStock').value = "50";
+                document.getElementById('prodLocation').value = "Godown Bay 1";
+                document.getElementById('prodHsn').value = "2523";
+
+                autoSuggestPresetImage();
             }
+
+            modal.classList.remove('hidden');
         }
 
-        function openAddStockModal() {
-            document.getElementById('addStockModal').classList.remove('hidden');
-        }
         function closeAddStockModal() {
             document.getElementById('addStockModal').classList.add('hidden');
         }
 
         function handleSaveProduct(e) {
             e.preventDefault();
-            const newProd = {
-                id: 'p_' + Date.now(),
-                name: document.getElementById('prodName').value,
-                category: document.getElementById('prodCategory').value,
-                unit: document.getElementById('prodUnit').value,
-                stock: parseInt(document.getElementById('prodStock').value) || 0,
-                costPrice: parseFloat(document.getElementById('prodCost').value) || 0,
-                sellPrice: parseFloat(document.getElementById('prodPrice').value) || 0,
-                minStock: parseInt(document.getElementById('prodMinStock').value) || 10,
-                hsn: document.getElementById('prodHsn').value || '3917'
-            };
+            const editId = document.getElementById('prodEditId').value;
+            const imageUrl = document.getElementById('prodImageUrl').value || PRESET_PRODUCT_IMAGES[0].url;
 
-            inventory.unshift(newProd);
-            saveInventory();
+            let brandValue = document.getElementById('prodBrand').value;
+            if (brandValue === 'Custom') {
+                const customTyped = document.getElementById('prodCustomBrand').value.trim();
+                brandValue = customTyped || 'Unbranded / None';
+            }
+
+            if (editId) {
+                // EDIT Existing
+                const existing = inventory.find(p => p.id === editId);
+                if (existing) {
+                    existing.name = document.getElementById('prodName').value.trim();
+                    existing.brand = brandValue;
+                    existing.category = document.getElementById('prodCategory').value;
+                    existing.size = document.getElementById('prodSize').value;
+                    existing.unit = document.getElementById('prodUnit').value;
+                    existing.stock = parseInt(document.getElementById('prodStock').value) || 0;
+                    existing.costPrice = parseFloat(document.getElementById('prodCost').value) || 0;
+                    existing.sellPrice = parseFloat(document.getElementById('prodPrice').value) || 0;
+                    existing.wholesalePrice = parseFloat(document.getElementById('prodWholesale').value) || existing.sellPrice;
+                    existing.minStock = parseInt(document.getElementById('prodMinStock').value) || 10;
+                    existing.location = document.getElementById('prodLocation').value.trim();
+                    existing.hsn = document.getElementById('prodHsn').value.trim() || '2523';
+                    existing.image = imageUrl;
+
+                    saveInventory();
+                    showToast(`Updated "${existing.name}" successfully!`);
+                }
+            } else {
+                // ADD New Product
+                const newProd = {
+                    id: 'c_' + Date.now(),
+                    name: document.getElementById('prodName').value.trim(),
+                    brand: brandValue,
+                    category: document.getElementById('prodCategory').value,
+                    size: document.getElementById('prodSize').value,
+                    unit: document.getElementById('prodUnit').value,
+                    stock: parseInt(document.getElementById('prodStock').value) || 0,
+                    costPrice: parseFloat(document.getElementById('prodCost').value) || 0,
+                    sellPrice: parseFloat(document.getElementById('prodPrice').value) || 0,
+                    wholesalePrice: parseFloat(document.getElementById('prodWholesale').value) || 0,
+                    minStock: parseInt(document.getElementById('prodMinStock').value) || 20,
+                    location: document.getElementById('prodLocation').value.trim() || 'Godown',
+                    hsn: document.getElementById('prodHsn').value.trim() || '2523',
+                    image: imageUrl
+                };
+
+                inventory.unshift(newProd);
+                saveInventory();
+                showToast(`New item "${newProd.name}" (${newProd.brand}) added to stock!`);
+            }
+
             closeAddStockModal();
             renderInventoryTable();
-            showToast(`Product "${newProd.name}" added to inventory!`);
+            renderPosCatalog();
+            renderDashboard();
+        }
+
+        function deleteProduct(productId) {
+            if (!confirm("Are you sure you want to delete this item from inventory?")) return;
+            inventory = inventory.filter(p => p.id !== productId);
+            saveInventory();
+            renderInventoryTable();
+            renderPosCatalog();
+            renderDashboard();
+            showToast("Product deleted from stock.");
+        }
+
+        // =========================================================================
+        // IMAGE UPLOAD & GALLERY PRESETS
+        // =========================================================================
+        function updateImagePreviewFromUrl(url) {
+            const preview = document.getElementById('prodImagePreview');
+            const placeholder = document.getElementById('prodImagePlaceholder');
+            const input = document.getElementById('prodImageUrl');
+
+            input.value = url;
+            if (url) {
+                preview.src = url;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+        }
+
+        function handleProductImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    updateImagePreviewFromUrl(e.target.result);
+                    showToast("Photo uploaded successfully!");
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function autoSuggestPresetImage() {
+            const cat = document.getElementById('prodCategory').value;
+            const match = PRESET_PRODUCT_IMAGES.find(img => img.category === cat) || PRESET_PRODUCT_IMAGES[0];
+            updateImagePreviewFromUrl(match.url);
+        }
+
+        function openPresetImagePicker() {
+            document.getElementById('presetImagePickerModal').classList.remove('hidden');
+        }
+
+        function closePresetImagePicker() {
+            document.getElementById('presetImagePickerModal').classList.add('hidden');
+        }
+
+        function renderPresetGallery() {
+            const grid = document.getElementById('galleryPresetsGrid');
+            grid.innerHTML = '';
+
+            PRESET_PRODUCT_IMAGES.forEach(img => {
+                const div = document.createElement('div');
+                div.className = "bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-400 p-2 rounded-2xl cursor-pointer transition flex flex-col items-center text-center group";
+                div.onclick = () => {
+                    updateImagePreviewFromUrl(img.url);
+                    closePresetImagePicker();
+                    showToast(`Selected "${img.name}" photo`);
+                };
+
+                div.innerHTML = `
+                    <div class="w-full h-16 rounded-xl overflow-hidden mb-1.5 bg-white border border-slate-100">
+                        <img src="${img.url}" alt="${img.name}" class="w-full h-full object-cover group-hover:scale-105 transition">
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-800 leading-tight">${img.name}</span>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        // =========================================================================
+        // RESTOCK / INWARD STOCK ENTRY
+        // =========================================================================
+        function openRestockModal(productId = null) {
+            const select = document.getElementById('restockProductId');
+            select.innerHTML = inventory.map(p => `
+                <option value="${p.id}" ${p.id === productId ? 'selected' : ''}>${p.name} [Stock: ${p.stock} ${p.unit}]</option>
+            `).join('');
+
+            const currentProd = inventory.find(p => p.id === (productId || select.value));
+            if (currentProd) {
+                document.getElementById('restockCost').value = currentProd.costPrice;
+            }
+
+            document.getElementById('restockQty').value = 200;
+            document.getElementById('restockSupplier').value = 'UltraTech Depot Hyderabad';
+            document.getElementById('restockInvoiceRef').value = '';
+
+            document.getElementById('restockModal').classList.remove('hidden');
+        }
+
+        function closeRestockModal() {
+            document.getElementById('restockModal').classList.add('hidden');
+        }
+
+        function handleInwardStock(e) {
+            e.preventDefault();
+            const prodId = document.getElementById('restockProductId').value;
+            const qty = parseInt(document.getElementById('restockQty').value) || 0;
+            const cost = parseFloat(document.getElementById('restockCost').value);
+
+            const prod = inventory.find(p => p.id === prodId);
+            if (!prod) return;
+
+            prod.stock += qty;
+            if (!isNaN(cost) && cost > 0) {
+                prod.costPrice = cost;
+            }
+
+            saveInventory();
+            closeRestockModal();
+            renderInventoryTable();
+            renderPosCatalog();
+            renderDashboard();
+            showToast(`Inward +${qty} ${prod.unit} for ${prod.name}! New stock: ${prod.stock}`);
+        }
+
+        function quickAddStock(productId) {
+            const item = inventory.find(p => p.id === productId);
+            if (!item) return;
+            openRestockModal(productId);
         }
 
         // =========================================================================
         // KHATA & CREDIT LEDGER
         // =========================================================================
         function computeKhataBalances() {
-            const map = {}; // customerName -> { name, phone, type, totalBilled, totalPaid, balance, invoices: [] }
+            const map = {};
 
             sales.forEach(s => {
                 const key = s.customerName.trim();
@@ -1743,7 +2724,6 @@
                 map[key].invoices.push(s);
             });
 
-            // Factor in additional khata payments
             khataPayments.forEach(p => {
                 const key = p.customerName.trim();
                 if (map[key]) {
@@ -1778,7 +2758,7 @@
                 grid.innerHTML = `
                     <div class="col-span-full py-16 text-center text-slate-400">
                         <i data-lucide="book-check" class="w-12 h-12 mx-auto mb-2 text-slate-300"></i>
-                        <p class="text-sm font-bold text-slate-700">No active Khata ledger accounts found.</p>
+                        <p class="text-sm font-bold text-slate-700">No active Contractor Khata accounts found.</p>
                     </div>
                 `;
                 lucide.createIcons();
@@ -1806,11 +2786,11 @@
 
                         <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-2xl text-xs">
                             <div>
-                                <span class="text-[10px] text-slate-400 block">Total Purchases</span>
+                                <span class="text-[10px] text-slate-400 block">Total Material Billed</span>
                                 <span class="font-bold text-slate-800 mono">${formatINR(acc.totalBilled)}</span>
                             </div>
                             <div>
-                                <span class="text-[10px] text-slate-400 block">Total Paid</span>
+                                <span class="text-[10px] text-slate-400 block">Total Received</span>
                                 <span class="font-bold text-emerald-700 mono">${formatINR(acc.totalPaid)}</span>
                             </div>
                         </div>
@@ -1834,10 +2814,6 @@
             });
 
             lucide.createIcons();
-        }
-
-        function filterKhata() {
-            renderKhataAccounts();
         }
 
         function openKhataPaymentModal(customerName, currentDue) {
@@ -1872,16 +2848,17 @@
             saveKhataPayments();
             closeKhataPaymentModal();
             renderKhataAccounts();
+            renderDashboard();
             showToast(`Recorded receipt of ${formatINR(amount)} from ${activeKhataCustomer}!`);
         }
 
         function sendWhatsAppReminder(name, phone, balance) {
             if (!phone) {
-                showToast("No phone number saved for this contractor.", "error");
+                showToast("No phone number saved for this builder.", "error");
                 return;
             }
             const cleanPhone = phone.replace(/\D/g, '');
-            const msg = encodeURIComponent(`Dear ${name},\n\nGreetings from AQUAPRO Fittings & Pipes. This is a gentle reminder that your pending balance is ${formatINR(balance)}.\n\nKindly arrange the payment via UPI / Bank transfer.\n\nThank you!`);
+            const msg = encodeURIComponent(`Dear ${name},\n\nGreetings from KARNI BUILTMART, Hyderabad.\nThis is a friendly reminder that your pending cement & building material balance is ${formatINR(balance)}.\n\nKindly arrange payment via NEFT / UPI.\n\nThank you!\nKARNI BUILTMART\nHyderabad`);
             window.open(`https://wa.me/91${cleanPhone}?text=${msg}`, '_blank');
         }
 
@@ -1963,7 +2940,7 @@
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `AQUAPRO_Sales_Journal_${getTodayDateString()}.csv`;
+            link.download = `KARNI_BUILTMART_Sales_Journal_${getTodayDateString()}.csv`;
             link.click();
             showToast("Sales journal exported to CSV!");
         }
@@ -1981,7 +2958,7 @@
             document.getElementById('invPrintCustPhone').innerText = bill.customerPhone ? '+91 ' + bill.customerPhone : '';
             document.getElementById('invPrintCustType').innerText = bill.customerType;
             document.getElementById('invPrintPayMode').innerText = bill.paymentMode;
-            document.getElementById('invPrintNotes').innerText = bill.notes ? 'Note: ' + bill.notes : '';
+            document.getElementById('invPrintNotes').innerText = bill.notes ? 'Site / Delivery Note: ' + bill.notes : '';
 
             const tbody = document.getElementById('invPrintItemsBody');
             tbody.innerHTML = '';
@@ -2028,6 +3005,7 @@
         // =========================================================================
         function exportFullBackupJSON() {
             const backup = {
+                company: "KARNI BUILTMART (Hyderabad)",
                 timestamp: new Date().toISOString(),
                 inventory: inventory,
                 sales: sales,
@@ -2036,13 +3014,13 @@
             const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = `AQUAPRO_Backup_${getTodayDateString()}.json`;
+            link.download = `KARNI_BUILTMART_Backup_${getTodayDateString()}.json`;
             link.click();
             showToast("Complete database backup exported!");
         }
 
         function resetToDemoData() {
-            if (confirm("Reset to factory demo database? Current local data will be replaced.")) {
+            if (confirm("Reset to default KARNI BUILTMART catalog & demo data?")) {
                 inventory = [...INITIAL_INVENTORY];
                 sales = [...INITIAL_SALES];
                 khataPayments = [];
@@ -2050,7 +3028,7 @@
                 saveSales();
                 saveKhataPayments();
                 renderDashboard();
-                showToast("Reset to demo data complete!");
+                showToast("Reset to Karni Builtmart demo data complete!");
             }
         }
 
