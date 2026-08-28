@@ -862,11 +862,14 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-2.5">
+                    <button onclick="openSupplierPaymentModal()" class="px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow-2xs">
+                        <i data-lucide="credit-card" class="w-4 h-4"></i> Pay Supplier / Settle Due
+                    </button>
                     <button onclick="exportPurchasesCSV()" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs">
-                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i> Export Purchases (CSV)
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i> Export (CSV)
                     </button>
                     <button onclick="openNewPurchaseModal()" class="px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-600 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm shadow-teal-700/20">
-                        <i data-lucide="plus-circle" class="w-4 h-4 text-amber-300"></i> + New Purchase Invoice / Inward
+                        <i data-lucide="plus-circle" class="w-4 h-4 text-amber-300"></i> + New Purchase Invoice
                     </button>
                 </div>
             </div>
@@ -1548,7 +1551,7 @@
     </div>
 
     <!-- ========================================================================= -->
-    <!-- MODAL: CREATE NEW PURCHASE INVOICE & INWARD STOCK (MULTI-ITEM)            -->
+    <!-- MODAL: CREATE / EDIT PURCHASE INVOICE & INWARD STOCK (MULTI-ITEM)         -->
     <!-- ========================================================================= -->
     <div id="newPurchaseModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[130] hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white max-w-3xl w-full rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4 my-8 animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] flex flex-col justify-between">
@@ -1558,8 +1561,8 @@
                         <i data-lucide="package-plus" class="w-5 h-5"></i>
                     </div>
                     <div>
-                        <h4 class="text-base font-extrabold text-slate-900">New Purchase Invoice & Inward Stock</h4>
-                        <p class="text-xs text-slate-500">Record factory / C&F inward shipments and auto-update godown inventory</p>
+                        <h4 id="purchModalTitle" class="text-base font-extrabold text-slate-900">New Purchase Invoice & Inward Stock</h4>
+                        <p id="purchModalSubtitle" class="text-xs text-slate-500">Record factory / C&F inward shipments and auto-update godown inventory</p>
                     </div>
                 </div>
                 <button onclick="closeNewPurchaseModal()" class="text-slate-400 hover:text-slate-700 p-1">
@@ -1568,6 +1571,8 @@
             </div>
 
             <form onsubmit="handleSavePurchase(event)" class="space-y-4 text-xs overflow-y-auto pr-1 flex-1 custom-scrollbar">
+                <input type="hidden" id="purchModalEditPurchaseNo" value="">
+
                 <!-- Supplier Info -->
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
                     <div class="flex items-center justify-between">
@@ -1607,13 +1612,38 @@
                             <input type="date" id="purchModalDate" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800">
                         </div>
                     </div>
+
+                    <!-- Vendor Invoice File / Bill Upload -->
+                    <div class="pt-2 border-t border-slate-200">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 w-full sm:w-auto">
+                                <div id="purchBillPreviewThumb" class="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center text-slate-400 shrink-0">
+                                    <i data-lucide="file-text" class="w-6 h-6"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <span class="font-bold text-slate-800 text-xs block">Attach Vendor Invoice / Paper Bill Slip</span>
+                                    <span id="purchBillFileName" class="text-[10px] text-slate-500 truncate block">Upload supplier receipt photo or scan to verify inward prices</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                                <input type="file" id="purchModalInvoiceFile" accept="image/*" onchange="handlePurchaseBillFileUpload(event)" class="hidden">
+                                <input type="hidden" id="purchModalInvoicePhotoUrl" value="">
+                                <button type="button" onclick="document.getElementById('purchModalInvoiceFile').click()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl flex items-center gap-1.5 transition">
+                                    <i data-lucide="upload" class="w-3.5 h-3.5"></i> Upload Bill
+                                </button>
+                                <button type="button" onclick="setPresetPurchaseBillPhoto()" class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-[11px] rounded-xl border border-amber-200 transition">
+                                    Sample Slip
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Inward Line Items -->
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
                         <span class="font-black text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
-                            <i data-lucide="boxes" class="w-3.5 h-3.5 text-amber-500"></i> Inward Materials / Items (Updates Stock)
+                            <i data-lucide="boxes" class="w-3.5 h-3.5 text-amber-500"></i> Inward Materials / Line Items (Updates Godown Stock & Cost Price)
                         </span>
                         <button type="button" onclick="addPurchaseModalLineItem()" class="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-lg font-bold text-xs flex items-center gap-1 border border-teal-200">
                             <i data-lucide="plus" class="w-3.5 h-3.5"></i> + Add Item Line
@@ -1646,7 +1676,7 @@
                                 <label class="block font-bold text-slate-700 mb-1">Payment Status *</label>
                                 <select id="purchModalPaymentStatus" onchange="handlePurchasePaymentStatusChange()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-900">
                                     <option value="Paid" selected>Paid in Full</option>
-                                    <option value="Credit">Credit / Pay Later (Due)</option>
+                                    <option value="Credit">Credit / Pay Later (Unpaid)</option>
                                     <option value="Partial">Partial Payment</option>
                                 </select>
                             </div>
@@ -1668,7 +1698,7 @@
                                 <input type="number" id="purchModalPaidAmount" oninput="recalculatePurchaseModalTotals()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-black mono text-emerald-700">
                             </div>
                             <div>
-                                <label class="block font-bold text-slate-700 mb-1">Balance Due (₹)</label>
+                                <label class="block font-bold text-slate-700 mb-1">Unpaid Balance Due (₹)</label>
                                 <input type="number" id="purchModalBalanceDue" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-black mono text-rose-600">
                             </div>
                         </div>
@@ -1700,18 +1730,178 @@
 
                         <div class="p-2 bg-emerald-50 rounded-lg text-[10px] text-emerald-800 font-medium flex items-center gap-1.5 border border-emerald-100">
                             <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0"></i>
-                            <span>Stock counts in godown will automatically increase upon saving!</span>
+                            <span>Godown inventory and cost price will automatically sync upon saving!</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex justify-end gap-2 pt-2 border-t border-slate-100 shrink-0">
                     <button type="button" onclick="closeNewPurchaseModal()" class="px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Cancel</button>
-                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-600 text-white font-extrabold shadow-sm shadow-teal-700/20 flex items-center gap-1.5">
+                    <button type="submit" id="purchModalSubmitBtn" class="px-6 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-600 text-white font-extrabold shadow-sm shadow-teal-700/20 flex items-center gap-1.5">
                         <i data-lucide="check" class="w-4 h-4"></i> Save Purchase & Inward Stock
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: PAY SUPPLIER / SETTLE UNPAID PURCHASE DUES                          -->
+    <!-- ========================================================================= -->
+    <div id="supplierPaymentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[135] hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-lg w-full rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex justify-between items-start pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2.5 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200">
+                        <i data-lucide="credit-card" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-base font-extrabold text-slate-900">Record Payment to Supplier</h4>
+                        <p class="text-xs text-slate-500">Settle credit / unpaid balance on inward purchase bills</p>
+                    </div>
+                </div>
+                <button onclick="closeSupplierPaymentModal()" class="text-slate-400 hover:text-slate-700 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleSupplierPaymentSubmit(event)" class="space-y-3.5 text-xs">
+                <!-- Select Purchase Invoice -->
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Select Unpaid Purchase Invoice *</label>
+                    <select id="suppPayInvoiceSelect" onchange="handleSupplierPaymentInvoiceSelect()" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <!-- Invoice Summary Card -->
+                <div id="suppPayInvoiceSummaryCard" class="bg-amber-50/50 p-3.5 rounded-2xl border border-amber-200 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Supplier:</span>
+                        <span id="suppPaySupplierNameText" class="font-extrabold text-slate-900 text-xs">UltraTech Cement Depot</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 pt-2 border-t border-amber-100 text-center">
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">Total Inward</span>
+                            <span id="suppPayTotalBilledText" class="font-black mono text-slate-900 text-xs">₹0</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">Already Paid</span>
+                            <span id="suppPayAlreadyPaidText" class="font-black mono text-emerald-700 text-xs">₹0</span>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-rose-500 font-bold block">Current Unpaid Due</span>
+                            <span id="suppPayCurrentDueText" class="font-black mono text-rose-700 text-xs">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Payment Amount (₹) *</label>
+                        <input type="number" id="suppPayAmountInput" required min="1" step="1" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-black mono text-emerald-700 text-sm focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Payment Date *</label>
+                        <input type="date" id="suppPayDateInput" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Payment Mode *</label>
+                        <select id="suppPayModeInput" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800">
+                            <option value="Bank Transfer / RTGS / NEFT" selected>Bank Transfer / RTGS / NEFT</option>
+                            <option value="UPI (PhonePe / GPay / Paytm)">UPI (PhonePe / GPay)</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Cheque">Cheque</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Bank Ref / UTR / Cheque #</label>
+                        <input type="text" id="suppPayRefInput" placeholder="e.g. UTR-9821447 / CHQ-10442" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold mono">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Payment Notes / Remarks</label>
+                    <input type="text" id="suppPayNotesInput" placeholder="e.g. Cleared via HDFC Bank Current A/C" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl">
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeSupplierPaymentModal()" class="px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-xs flex items-center gap-1.5">
+                        <i data-lucide="check" class="w-4 h-4"></i> Record Payment & Settle Due
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: PREVIEW UPLOADED SUPPLIER BILL / INVOICE PHOTO                      -->
+    <!-- ========================================================================= -->
+    <div id="previewUploadedBillModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-[140] hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white max-w-2xl w-full rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4 my-8 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex justify-between items-start pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2.5 rounded-2xl bg-teal-50 text-teal-700 border border-teal-200">
+                        <i data-lucide="file-check" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h4 id="billViewTitle" class="text-base font-extrabold text-slate-900">Uploaded Supplier Bill & Invoice</h4>
+                        <p id="billViewSubtitle" class="text-xs text-slate-500">Inspect paper bill slip, verify rates and edit invoice prices</p>
+                    </div>
+                </div>
+                <button onclick="closeUploadedBillModal()" class="text-slate-400 hover:text-slate-700 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Bill Photo / Document Viewer -->
+            <div class="rounded-2xl border border-slate-200 overflow-hidden bg-slate-900 flex items-center justify-center max-h-80 relative group">
+                <img id="billViewImage" src="" alt="Supplier Bill" class="max-h-80 w-full object-contain">
+                <div class="absolute bottom-2 right-2 bg-slate-900/80 backdrop-blur-sm px-2.5 py-1 rounded-lg text-[10px] text-white font-bold">
+                    Vendor Invoice Attachment
+                </div>
+            </div>
+
+            <!-- Inward Prices Summary -->
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Supplier / Factory:</span>
+                        <span id="billViewSupplier" class="font-extrabold text-slate-900 text-sm">UltraTech Depot</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Invoice / Date:</span>
+                        <span id="billViewDateRef" class="font-bold text-slate-800 mono">INV-9982 • 2026-08-28</span>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-200 flex justify-between items-center">
+                    <div>
+                        <span class="text-[10px] text-slate-500">Total Billed: <strong id="billViewTotal" class="text-slate-900 font-bold mono">₹0</strong></span>
+                        <span class="text-[10px] text-slate-500 ml-2">Paid: <strong id="billViewPaid" class="text-emerald-700 font-bold mono">₹0</strong></span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-rose-600 font-bold">Unpaid Due: <strong id="billViewDue" class="font-black mono text-rose-700">₹0</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeUploadedBillModal()" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-bold text-xs">Close</button>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="billViewPayDueBtn" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-2xs">
+                        <i data-lucide="credit-card" class="w-3.5 h-3.5"></i> Pay Due
+                    </button>
+                    <button type="button" id="billViewEditBtn" class="px-4 py-2 bg-teal-700 hover:bg-teal-600 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-2xs">
+                        <i data-lucide="edit" class="w-3.5 h-3.5"></i> Edit Bill / Update Prices
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1932,7 +2122,8 @@
                 grandTotal: 124250,
                 paidAmount: 124250,
                 balanceDue: 0,
-                notes: 'Cement trailer unloaded at Godown Bay 1'
+                notes: 'Cement trailer unloaded at Godown Bay 1',
+                billPhoto: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80'
             },
             {
                 purchaseNo: 'PUR-2026-002',
@@ -1955,7 +2146,8 @@
                 grandTotal: 99500,
                 paidAmount: 0,
                 balanceDue: 99500,
-                notes: 'Payment due in 15 days as per dealer credit terms'
+                notes: 'Payment due in 15 days as per dealer credit terms',
+                billPhoto: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=800&q=80'
             },
             {
                 purchaseNo: 'PUR-2026-003',
@@ -1978,7 +2170,8 @@
                 grandTotal: 31700,
                 paidAmount: 31700,
                 balanceDue: 0,
-                notes: 'Received in good condition at Pipe Rack A-1'
+                notes: 'Received in good condition at Pipe Rack A-1',
+                billPhoto: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80'
             }
         ];
 
@@ -2083,6 +2276,15 @@
             const savedPurchases = localStorage.getItem('karni_purchases') || localStorage.getItem('sarda_purchases');
             if (savedPurchases) {
                 purchases = JSON.parse(savedPurchases);
+                purchases.forEach(p => {
+                    if (p.balanceDue === undefined) {
+                        p.balanceDue = Math.max(0, (p.grandTotal || p.subtotal || 0) - (p.paidAmount || 0));
+                    }
+                    if (!p.billPhoto) {
+                        p.billPhoto = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80';
+                    }
+                });
+                savePurchases();
             } else {
                 purchases = [...INITIAL_PURCHASES];
                 savePurchases();
@@ -3485,47 +3687,67 @@
 
             filtered.forEach(p => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition';
+                const isUnpaid = (p.balanceDue || 0) > 0;
+                tr.className = isUnpaid ? 'bg-amber-50/20 hover:bg-amber-50/60 transition' : 'hover:bg-slate-50 transition';
 
                 const isPaid = p.paymentStatus === 'Paid';
                 const isPartial = p.paymentStatus === 'Partial';
                 const statusBadge = isPaid
-                    ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Paid in Full</span>`
+                    ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Paid in Full</span>`
                     : (isPartial 
-                        ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Partial (Due: ${formatINR(p.balanceDue)})</span>`
-                        : `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">Credit (Due: ${formatINR(p.balanceDue)})</span>`);
+                        ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">Partial (Due: ${formatINR(p.balanceDue)})</span>`
+                        : `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">Unpaid (Due: ${formatINR(p.balanceDue)})</span>`);
 
-                const itemsSummary = (p.items || []).map(it => `<span class="inline-block bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded text-[10px] mr-1 mb-1 font-semibold">${it.name.split('(')[0].trim()}: <strong>${it.qty}</strong></span>`).join('');
+                const itemsSummary = (p.items || []).map(it => `
+                    <span class="inline-block bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded text-[10px] mr-1 mb-1 font-semibold border border-slate-200/80">
+                        ${it.name.split('(')[0].trim()}: <strong>${it.qty}</strong> @ ${formatINR(it.rate)}
+                    </span>
+                `).join('');
+
+                const hasBill = !!p.billPhoto;
 
                 tr.innerHTML = `
                     <td class="py-3 px-4">
-                        <span class="font-black text-slate-900 mono block">${p.purchaseNo}</span>
-                        <span class="text-[10px] text-slate-400">${p.date}</span>
+                        <span class="font-black text-slate-900 mono block text-xs">${p.purchaseNo}</span>
+                        <span class="text-[10px] text-slate-400 font-medium">${p.date}</span>
                     </td>
                     <td class="py-3 px-3">
                         <span class="font-bold text-slate-900 block">${p.supplierName}</span>
                         <span class="text-[10px] text-slate-400 mono">${p.supplierPhone ? '+91 ' + p.supplierPhone : ''} ${p.invoiceRef ? '• Ref: ' + p.invoiceRef : ''}</span>
                     </td>
                     <td class="py-3 px-3">
-                        <span class="font-bold text-slate-700 mono bg-slate-100 px-2 py-0.5 rounded text-[11px]">${p.vehicleNo || 'Direct Depot'}</span>
+                        <span class="font-bold text-slate-700 mono bg-slate-100 px-2 py-0.5 rounded text-[11px]">${p.vehicleNo || 'Depot Hub'}</span>
                     </td>
                     <td class="py-3 px-3 max-w-xs">
                         <div class="flex flex-wrap">${itemsSummary}</div>
                     </td>
                     <td class="py-3 px-3">
                         <span class="font-black text-slate-900 mono block text-sm">${formatINR(p.grandTotal || p.subtotal)}</span>
-                        <span class="text-[10px] text-slate-400">${p.paymentMode}</span>
+                        <span class="text-[10px] text-slate-500 font-medium">${p.paymentMode}</span>
                     </td>
                     <td class="py-3 px-3">
                         ${statusBadge}
                     </td>
                     <td class="py-3 px-4 text-right whitespace-nowrap">
-                        <button onclick="previewPurchaseReceipt('${p.purchaseNo}')" class="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg mr-1 transition" title="View / Print Goods Receipt Note (GRN)">
-                            <i data-lucide="printer" class="w-4 h-4"></i>
-                        </button>
-                        <button onclick="deletePurchaseRecord('${p.purchaseNo}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Delete Purchase Record">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
+                        <div class="flex items-center justify-end gap-1">
+                            ${isUnpaid ? `
+                                <button onclick="openSupplierPaymentModal('${p.purchaseNo}')" class="px-2 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg font-bold text-[10px] flex items-center gap-1 shadow-2xs" title="Pay Supplier / Settle Unpaid Due">
+                                    <i data-lucide="credit-card" class="w-3 h-3"></i> Pay Due
+                                </button>
+                            ` : ''}
+                            <button onclick="viewUploadedBill('${p.purchaseNo}')" class="p-1.5 ${hasBill ? 'text-teal-700 bg-teal-50 hover:bg-teal-100' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'} rounded-lg transition" title="View Uploaded Vendor Bill Slip">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="editPurchaseRecord('${p.purchaseNo}')" class="p-1.5 text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition" title="Edit Purchase Bill & Inward Prices">
+                                <i data-lucide="edit" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="previewPurchaseReceipt('${p.purchaseNo}')" class="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition" title="Print Goods Receipt Note (GRN)">
+                                <i data-lucide="printer" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deletePurchaseRecord('${p.purchaseNo}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Void Purchase Record">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -3535,9 +3757,14 @@
         }
 
         // =========================================================================
-        // PURCHASE ENTRY MODAL LOGIC
+        // PURCHASE ENTRY & EDIT MODAL LOGIC
         // =========================================================================
         function openNewPurchaseModal(prefilledProductId = null) {
+            document.getElementById('purchModalEditPurchaseNo').value = '';
+            document.getElementById('purchModalTitle').innerText = 'New Purchase Invoice & Inward Stock';
+            document.getElementById('purchModalSubtitle').innerText = 'Record factory / C&F inward shipments and auto-update godown inventory';
+            document.getElementById('purchModalSubmitBtn').innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Save Purchase & Inward Stock';
+
             document.getElementById('purchModalSupplierName').value = 'UltraTech Cement Regional Depot (Shamshabad Hub)';
             document.getElementById('purchModalSupplierPhone').value = '9440012345';
             document.getElementById('purchModalInvoiceRef').value = 'INV-' + Math.floor(1000 + Math.random() * 9000);
@@ -3547,6 +3774,8 @@
             document.getElementById('purchModalPaymentMode').value = 'Bank Transfer / RTGS';
             document.getElementById('purchModalNotes').value = '';
             document.getElementById('purchModalApplyGst').checked = false;
+            document.getElementById('purchModalInvoicePhotoUrl').value = '';
+            updatePurchaseBillPreviewUI('', 'Upload supplier receipt photo or scan to verify inward prices');
 
             currentPurchaseLines = [];
             if (prefilledProductId) {
@@ -3561,6 +3790,51 @@
                     });
                 }
             } else {
+                addPurchaseModalLineItem();
+            }
+
+            renderPurchaseModalLines();
+            recalculatePurchaseModalTotals();
+            document.getElementById('newPurchaseModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function editPurchaseRecord(purchaseNo) {
+            const p = purchases.find(item => item.purchaseNo === purchaseNo);
+            if (!p) return;
+
+            document.getElementById('purchModalEditPurchaseNo').value = p.purchaseNo;
+            document.getElementById('purchModalTitle').innerText = `Edit Purchase Invoice #${p.purchaseNo}`;
+            document.getElementById('purchModalSubtitle').innerText = 'Modify invoice rates, inward quantities, supplier details or payment terms';
+            document.getElementById('purchModalSubmitBtn').innerHTML = '<i data-lucide="save" class="w-4 h-4"></i> Update Invoice & Sync Prices';
+
+            document.getElementById('purchModalSupplierName').value = p.supplierName || '';
+            document.getElementById('purchModalSupplierPhone').value = p.supplierPhone || '';
+            document.getElementById('purchModalInvoiceRef').value = p.invoiceRef || '';
+            document.getElementById('purchModalVehicleNo').value = p.vehicleNo || '';
+            document.getElementById('purchModalDate').value = p.date || getTodayDateString();
+            document.getElementById('purchModalPaymentStatus').value = p.paymentStatus || 'Paid';
+            document.getElementById('purchModalPaymentMode').value = p.paymentMode || 'Bank Transfer / RTGS';
+            document.getElementById('purchModalNotes').value = p.notes || '';
+            document.getElementById('purchModalApplyGst').checked = !!p.applyGst;
+            document.getElementById('purchModalPaidAmount').value = p.paidAmount || 0;
+            document.getElementById('purchModalInvoicePhotoUrl').value = p.billPhoto || '';
+
+            if (p.billPhoto) {
+                updatePurchaseBillPreviewUI(p.billPhoto, 'Vendor Invoice Document Attached');
+            } else {
+                updatePurchaseBillPreviewUI('', 'No bill file attached');
+            }
+
+            currentPurchaseLines = (p.items || []).map((it, idx) => ({
+                lineId: 'purch_line_' + Date.now() + '_' + idx,
+                productId: it.productId,
+                qty: it.qty,
+                rate: it.rate,
+                total: it.total || (it.qty * it.rate)
+            }));
+
+            if (currentPurchaseLines.length === 0) {
                 addPurchaseModalLineItem();
             }
 
@@ -3718,6 +3992,181 @@
             if (grandSpan) grandSpan.innerText = formatINR(grandTotal);
         }
 
+        // Bill Upload Handlers
+        function handlePurchaseBillFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const dataUrl = e.target.result;
+                    document.getElementById('purchModalInvoicePhotoUrl').value = dataUrl;
+                    updatePurchaseBillPreviewUI(dataUrl, file.name);
+                    showToast(`Vendor Bill "${file.name}" attached!`);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setPresetPurchaseBillPhoto() {
+            const sampleUrl = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80';
+            document.getElementById('purchModalInvoicePhotoUrl').value = sampleUrl;
+            updatePurchaseBillPreviewUI(sampleUrl, 'Sample_Depot_Invoice_Slip.jpg');
+            showToast("Sample supplier invoice attached!");
+        }
+
+        function updatePurchaseBillPreviewUI(url, label) {
+            const thumb = document.getElementById('purchBillPreviewThumb');
+            const nameSpan = document.getElementById('purchBillFileName');
+            if (nameSpan) nameSpan.innerText = label;
+
+            if (thumb) {
+                if (url) {
+                    thumb.innerHTML = `<img src="${url}" alt="Bill" class="w-full h-full object-cover">`;
+                } else {
+                    thumb.innerHTML = `<i data-lucide="file-text" class="w-6 h-6 text-slate-400"></i>`;
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        function viewUploadedBill(purchaseNo) {
+            const p = purchases.find(item => item.purchaseNo === purchaseNo);
+            if (!p) return;
+
+            const billImg = document.getElementById('billViewImage');
+            const sampleBillUrl = 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80';
+            billImg.src = p.billPhoto || sampleBillUrl;
+
+            document.getElementById('billViewTitle').innerText = `Supplier Invoice: ${p.purchaseNo}`;
+            document.getElementById('billViewSubtitle').innerText = `${p.supplierName} • Ref: ${p.invoiceRef || 'N/A'}`;
+            document.getElementById('billViewSupplier').innerText = p.supplierName;
+            document.getElementById('billViewDateRef').innerText = `${p.invoiceRef || p.purchaseNo} • ${p.date}`;
+            document.getElementById('billViewTotal').innerText = formatINR(p.grandTotal || p.subtotal);
+            document.getElementById('billViewPaid').innerText = formatINR(p.paidAmount || 0);
+            document.getElementById('billViewDue').innerText = formatINR(p.balanceDue || 0);
+
+            const payDueBtn = document.getElementById('billViewPayDueBtn');
+            if (p.balanceDue > 0) {
+                payDueBtn.classList.remove('hidden');
+                payDueBtn.onclick = () => {
+                    closeUploadedBillModal();
+                    openSupplierPaymentModal(p.purchaseNo);
+                };
+            } else {
+                payDueBtn.classList.add('hidden');
+            }
+
+            const editBtn = document.getElementById('billViewEditBtn');
+            editBtn.onclick = () => {
+                closeUploadedBillModal();
+                editPurchaseRecord(p.purchaseNo);
+            };
+
+            document.getElementById('previewUploadedBillModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeUploadedBillModal() {
+            document.getElementById('previewUploadedBillModal').classList.add('hidden');
+        }
+
+        // =========================================================================
+        // SUPPLIER PAYMENT (SETTLE UNPAID DUES) LOGIC
+        // =========================================================================
+        function openSupplierPaymentModal(purchaseNo = null) {
+            const select = document.getElementById('suppPayInvoiceSelect');
+            select.innerHTML = '';
+
+            // Get all purchases or prioritize unpaid ones
+            const unpaidPurchases = purchases.filter(p => (p.balanceDue || 0) > 0);
+            const list = unpaidPurchases.length > 0 ? unpaidPurchases : purchases;
+
+            if (list.length === 0) {
+                showToast("No purchase invoices found!", "error");
+                return;
+            }
+
+            list.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.purchaseNo;
+                opt.innerText = `${p.purchaseNo} - ${p.supplierName} [Due: ${formatINR(p.balanceDue || 0)}]`;
+                if (p.purchaseNo === purchaseNo) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            if (!purchaseNo && unpaidPurchases.length > 0) {
+                select.value = unpaidPurchases[0].purchaseNo;
+            }
+
+            document.getElementById('suppPayDateInput').value = getTodayDateString();
+            document.getElementById('suppPayRefInput').value = 'UTR-' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('suppPayNotesInput').value = '';
+
+            handleSupplierPaymentInvoiceSelect();
+            document.getElementById('supplierPaymentModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeSupplierPaymentModal() {
+            document.getElementById('supplierPaymentModal').classList.add('hidden');
+        }
+
+        function handleSupplierPaymentInvoiceSelect() {
+            const select = document.getElementById('suppPayInvoiceSelect');
+            const purchaseNo = select.value;
+            const p = purchases.find(item => item.purchaseNo === purchaseNo);
+            if (!p) return;
+
+            document.getElementById('suppPaySupplierNameText').innerText = p.supplierName;
+            document.getElementById('suppPayTotalBilledText').innerText = formatINR(p.grandTotal || p.subtotal);
+            document.getElementById('suppPayAlreadyPaidText').innerText = formatINR(p.paidAmount || 0);
+            document.getElementById('suppPayCurrentDueText').innerText = formatINR(p.balanceDue || 0);
+            document.getElementById('suppPayAmountInput').value = p.balanceDue > 0 ? p.balanceDue : (p.grandTotal || p.subtotal);
+        }
+
+        function handleSupplierPaymentSubmit(e) {
+            e.preventDefault();
+            const purchaseNo = document.getElementById('suppPayInvoiceSelect').value;
+            const payAmount = Number(document.getElementById('suppPayAmountInput').value) || 0;
+            const payDate = document.getElementById('suppPayDateInput').value;
+            const payMode = document.getElementById('suppPayModeInput').value;
+            const payRef = document.getElementById('suppPayRefInput').value.trim();
+            const payNotes = document.getElementById('suppPayNotesInput').value.trim();
+
+            if (payAmount <= 0) {
+                showToast("Please enter a valid payment amount!", "error");
+                return;
+            }
+
+            const p = purchases.find(item => item.purchaseNo === purchaseNo);
+            if (!p) return;
+
+            p.paidAmount = (Number(p.paidAmount) || 0) + payAmount;
+            const totalVal = (Number(p.grandTotal) || Number(p.subtotal) || 0);
+            p.balanceDue = Math.max(0, totalVal - p.paidAmount);
+            p.paymentStatus = p.balanceDue === 0 ? 'Paid' : 'Partial';
+
+            if (!p.paymentHistory) p.paymentHistory = [];
+            p.paymentHistory.push({
+                date: payDate,
+                amount: payAmount,
+                mode: payMode,
+                ref: payRef,
+                notes: payNotes,
+                timestamp: new Date().toISOString()
+            });
+
+            savePurchases();
+            closeSupplierPaymentModal();
+            renderPurchasesView();
+            renderDashboard();
+
+            showToast(`✅ Payment of ${formatINR(payAmount)} recorded for ${p.supplierName} (${p.purchaseNo})!`);
+        }
+
+        // =========================================================================
+        // SAVE PURCHASE (NEW & EDIT UPDATE)
+        // =========================================================================
         function handleSavePurchase(e) {
             e.preventDefault();
             if (currentPurchaseLines.length === 0) {
@@ -3725,6 +4174,7 @@
                 return;
             }
 
+            const editPurchaseNo = document.getElementById('purchModalEditPurchaseNo').value.trim();
             const supplierName = document.getElementById('purchModalSupplierName').value.trim();
             const supplierPhone = document.getElementById('purchModalSupplierPhone').value.trim();
             const invoiceRef = document.getElementById('purchModalInvoiceRef').value.trim();
@@ -3734,69 +4184,137 @@
             const paymentMode = document.getElementById('purchModalPaymentMode').value;
             const notes = document.getElementById('purchModalNotes').value.trim();
             const applyGst = document.getElementById('purchModalApplyGst').checked;
+            const billPhoto = document.getElementById('purchModalInvoicePhotoUrl').value;
 
             let subtotal = 0;
             const items = [];
 
-            // Update inventory stock counts & cost prices
-            currentPurchaseLines.forEach(line => {
-                const prod = inventory.find(p => p.id === line.productId);
-                if (prod && line.qty > 0) {
-                    prod.stock += line.qty;
-                    if (line.rate > 0) prod.costPrice = line.rate;
-                    items.push({
-                        productId: prod.id,
-                        name: prod.name,
-                        qty: line.qty,
-                        rate: line.rate,
-                        total: line.qty * line.rate
-                    });
-                    subtotal += (line.qty * line.rate);
-                }
-            });
+            if (editPurchaseNo) {
+                // UPDATE EXISTING PURCHASE
+                const oldRec = purchases.find(p => p.purchaseNo === editPurchaseNo);
+                if (!oldRec) return;
 
-            const gstAmount = applyGst ? Math.round(subtotal * 0.18) : 0;
-            const grandTotal = subtotal + gstAmount;
-            let paidAmount = Number(document.getElementById('purchModalPaidAmount').value) || 0;
-            if (paymentStatus === 'Paid') paidAmount = grandTotal;
-            if (paymentStatus === 'Credit') paidAmount = 0;
-            const balanceDue = Math.max(0, grandTotal - paidAmount);
+                // 1. Revert previous stock counts
+                (oldRec.items || []).forEach(oldIt => {
+                    const prod = inventory.find(p => p.id === oldIt.productId);
+                    if (prod) {
+                        prod.stock = Math.max(0, prod.stock - oldIt.qty);
+                    }
+                });
 
-            // Generate Purchase Number
-            const nextIdx = purchases.length + 1;
-            const purchaseNo = `PUR-2026-${String(nextIdx).padStart(3, '0')}`;
+                // 2. Apply new stock counts & cost rates
+                currentPurchaseLines.forEach(line => {
+                    const prod = inventory.find(p => p.id === line.productId);
+                    if (prod && line.qty > 0) {
+                        prod.stock += line.qty;
+                        if (line.rate > 0) prod.costPrice = line.rate;
+                        items.push({
+                            productId: prod.id,
+                            name: prod.name,
+                            qty: line.qty,
+                            rate: line.rate,
+                            total: line.qty * line.rate
+                        });
+                        subtotal += (line.qty * line.rate);
+                    }
+                });
 
-            const newRecord = {
-                purchaseNo,
-                date: purchaseDate,
-                supplierName,
-                supplierPhone,
-                invoiceRef,
-                vehicleNo,
-                paymentStatus,
-                paymentMode,
-                items,
-                subtotal,
-                applyGst,
-                gstRate: applyGst ? 18 : 0,
-                gstAmount,
-                grandTotal,
-                paidAmount,
-                balanceDue,
-                notes
-            };
+                const gstAmount = applyGst ? Math.round(subtotal * 0.18) : 0;
+                const grandTotal = subtotal + gstAmount;
+                let paidAmount = Number(document.getElementById('purchModalPaidAmount').value) || 0;
+                if (paymentStatus === 'Paid') paidAmount = grandTotal;
+                if (paymentStatus === 'Credit') paidAmount = 0;
+                const balanceDue = Math.max(0, grandTotal - paidAmount);
 
-            purchases.unshift(newRecord);
-            savePurchases();
-            saveInventory();
-            closeNewPurchaseModal();
-            updateLowStockUI();
-            renderPurchasesView();
-            renderInventoryTable();
-            renderPosCatalog();
-            renderDashboard();
+                oldRec.supplierName = supplierName;
+                oldRec.supplierPhone = supplierPhone;
+                oldRec.invoiceRef = invoiceRef;
+                oldRec.vehicleNo = vehicleNo;
+                oldRec.date = purchaseDate;
+                oldRec.paymentStatus = paymentStatus;
+                oldRec.paymentMode = paymentMode;
+                oldRec.items = items;
+                oldRec.subtotal = subtotal;
+                oldRec.applyGst = applyGst;
+                oldRec.gstRate = applyGst ? 18 : 0;
+                oldRec.gstAmount = gstAmount;
+                oldRec.grandTotal = grandTotal;
+                oldRec.paidAmount = paidAmount;
+                oldRec.balanceDue = balanceDue;
+                oldRec.notes = notes;
+                if (billPhoto) oldRec.billPhoto = billPhoto;
 
-            showToast(`Inward Purchase #${purchaseNo} saved! Godown stock updated.`);
+                savePurchases();
+                saveInventory();
+                closeNewPurchaseModal();
+                updateLowStockUI();
+                renderPurchasesView();
+                renderInventoryTable();
+                renderPosCatalog();
+                renderDashboard();
+
+                showToast(`✅ Purchase Invoice #${editPurchaseNo} updated! Prices & stock synced.`);
+            } else {
+                // CREATE NEW PURCHASE
+                currentPurchaseLines.forEach(line => {
+                    const prod = inventory.find(p => p.id === line.productId);
+                    if (prod && line.qty > 0) {
+                        prod.stock += line.qty;
+                        if (line.rate > 0) prod.costPrice = line.rate;
+                        items.push({
+                            productId: prod.id,
+                            name: prod.name,
+                            qty: line.qty,
+                            rate: line.rate,
+                            total: line.qty * line.rate
+                        });
+                        subtotal += (line.qty * line.rate);
+                    }
+                });
+
+                const gstAmount = applyGst ? Math.round(subtotal * 0.18) : 0;
+                const grandTotal = subtotal + gstAmount;
+                let paidAmount = Number(document.getElementById('purchModalPaidAmount').value) || 0;
+                if (paymentStatus === 'Paid') paidAmount = grandTotal;
+                if (paymentStatus === 'Credit') paidAmount = 0;
+                const balanceDue = Math.max(0, grandTotal - paidAmount);
+
+                const nextIdx = purchases.length + 1;
+                const purchaseNo = `PUR-2026-${String(nextIdx).padStart(3, '0')}`;
+
+                const newRecord = {
+                    purchaseNo,
+                    date: purchaseDate,
+                    supplierName,
+                    supplierPhone,
+                    invoiceRef,
+                    vehicleNo,
+                    paymentStatus,
+                    paymentMode,
+                    items,
+                    subtotal,
+                    applyGst,
+                    gstRate: applyGst ? 18 : 0,
+                    gstAmount,
+                    grandTotal,
+                    paidAmount,
+                    balanceDue,
+                    notes,
+                    billPhoto: billPhoto || 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=800&q=80'
+                };
+
+                purchases.unshift(newRecord);
+                savePurchases();
+                saveInventory();
+                closeNewPurchaseModal();
+                updateLowStockUI();
+                renderPurchasesView();
+                renderInventoryTable();
+                renderPosCatalog();
+                renderDashboard();
+
+                showToast(`Inward Purchase #${purchaseNo} saved! Godown stock updated.`);
+            }
         }
 
         function autoDraftLowStockPurchase() {
