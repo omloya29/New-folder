@@ -81,10 +81,10 @@
             body * {
                 visibility: hidden;
             }
-            #printInvoiceArea, #printInvoiceArea * {
+            #printInvoiceArea, #printInvoiceArea *, #printPurchaseArea, #printPurchaseArea * {
                 visibility: visible;
             }
-            #printInvoiceArea {
+            #printInvoiceArea, #printPurchaseArea {
                 position: absolute;
                 left: 0;
                 top: 0;
@@ -246,6 +246,10 @@
                     <i data-lucide="boxes" class="w-4 h-4 text-amber-400"></i> Cement & Stock
                     <span id="lowStockBadge" class="hidden bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">0</span>
                 </button>
+                <button onclick="switchView('purchases')" id="nav-purchases" class="nav-btn px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="truck" class="w-4 h-4 text-emerald-400"></i> Purchase Panel
+                    <span id="lowStockPurchaseBadge" class="hidden bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">0</span>
+                </button>
                 <button onclick="switchView('khata')" id="nav-khata" class="nav-btn px-3.5 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center gap-2 whitespace-nowrap">
                     <i data-lucide="book-open" class="w-4 h-4 text-amber-300"></i> Contractor Khata
                 </button>
@@ -284,6 +288,32 @@
     <!-- MAIN CONTENT CONTAINER                                                    -->
     <!-- ========================================================================= -->
     <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full space-y-6">
+
+        <!-- Global Low Stock Warning Banner -->
+        <div id="globalLowStockBanner" class="hidden bg-gradient-to-r from-amber-500/15 via-rose-500/15 to-amber-500/15 border border-amber-500/30 rounded-2xl p-3.5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 rounded-xl bg-amber-500 text-slate-950 font-black flex items-center justify-center shrink-0 shadow-xs">
+                    <i data-lucide="alert-octagon" class="w-5 h-5 text-slate-950"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-black text-rose-950 bg-rose-200/90 border border-rose-300 px-2 py-0.5 rounded-md uppercase tracking-wider">Low Stock Warning</span>
+                        <span id="globalLowStockCountText" class="text-xs font-extrabold text-slate-900">0 Products Below Minimum Godown Buffer!</span>
+                    </div>
+                    <p id="globalLowStockSummary" class="text-[11px] text-slate-600 font-medium line-clamp-1 mt-0.5">
+                        Urgent restock needed for depleted materials.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+                <button onclick="switchView('purchases')" class="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs whitespace-nowrap">
+                    <i data-lucide="truck" class="w-3.5 h-3.5 text-amber-400"></i> Open Purchase Panel
+                </button>
+                <button onclick="filterInventoryCategory('LowStock'); switchView('inventory');" class="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs whitespace-nowrap">
+                    View Items
+                </button>
+            </div>
+        </div>
 
         <!-- ========================================================================= -->
         <!-- VIEW 1: DASHBOARD & SUMMARY OVERVIEW                                      -->
@@ -755,6 +785,9 @@
                 <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
                     <div class="flex flex-wrap items-center gap-1">
                         <button onclick="filterInventoryCategory('All')" class="inv-filter active-inv-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition">All</button>
+                        <button onclick="filterInventoryCategory('LowStock')" id="invFilterLowStockBtn" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition flex items-center gap-1">
+                            <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-rose-500"></i> Low Stock (<span id="invLowStockCountPill">0</span>)
+                        </button>
                         <button onclick="filterInventoryCategory('Cement Bags (50kg)')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Cement Bags</button>
                         <button onclick="filterInventoryCategory('White Cement & Putty')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Putty & White</button>
                         <button onclick="filterInventoryCategory('Construction Chemicals')" class="inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Waterproofing</button>
@@ -803,6 +836,181 @@
                 <!-- Populated dynamically with rich product cards & images -->
             </div>
 
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- VIEW: PURCHASE PANEL & SUPPLIER INWARD SUPPLY LEDGER                      -->
+        <!-- ========================================================================= -->
+        <section id="view-purchases" class="app-view hidden space-y-6">
+            
+            <!-- Purchase Header Banner -->
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                <div>
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-2.5 bg-emerald-50 text-emerald-700 rounded-2xl border border-emerald-200/60 shadow-xs">
+                            <i data-lucide="truck" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-lg sm:text-xl font-extrabold text-slate-900">
+                                    KARNI BUILTMART - Purchase & Inward Supply Panel
+                                </h2>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">Hyderabad Hub</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-0.5">Manufacturer C&F inbound shipments, vendor invoices, stock inward, lorry & supplier payables</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <button onclick="exportPurchasesCSV()" class="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i> Export Purchases (CSV)
+                    </button>
+                    <button onclick="openNewPurchaseModal()" class="px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-600 text-white font-extrabold text-xs transition flex items-center gap-1.5 shadow-sm shadow-teal-700/20">
+                        <i data-lucide="plus-circle" class="w-4 h-4 text-amber-300"></i> + New Purchase Invoice / Inward
+                    </button>
+                </div>
+            </div>
+
+            <!-- Low Stock Reorder Banner / Urgent Section -->
+            <div id="purchasePanelLowStockAlert" class="bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 p-5 rounded-3xl border border-rose-200/90 shadow-2xs space-y-3">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <div class="p-2 rounded-xl bg-rose-600 text-white font-black shrink-0 shadow-xs">
+                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                                Urgent Inward Reorder Required (<span id="purchaseLowStockCount" class="text-rose-700 font-black">0</span> Items Low on Stock)
+                            </h3>
+                            <p class="text-xs text-slate-500">Materials below minimum godown buffer level. Create instant supplier purchase orders below.</p>
+                        </div>
+                    </div>
+                    <button onclick="autoDraftLowStockPurchase()" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm shadow-rose-600/20 whitespace-nowrap">
+                        <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> Auto-Draft Purchase for All Low Stock
+                    </button>
+                </div>
+
+                <div id="purchaseLowStockCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 pt-1">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Purchase KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Today's Purchases -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Today's Purchases</span>
+                        <div class="p-2 rounded-xl bg-teal-50 text-teal-600">
+                            <i data-lucide="arrow-down-left" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span id="kpiTodayPurchases" class="text-2xl sm:text-3xl font-black text-slate-900 mono">₹0</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>Inward Invoices Today:</span>
+                        <span id="kpiTodayPurchasesCount" class="font-bold text-slate-800 mono">0 bills</span>
+                    </div>
+                </div>
+
+                <!-- Total Purchases -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Purchases</span>
+                        <div class="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                            <i data-lucide="package-check" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span id="kpiTotalPurchases" class="text-2xl sm:text-3xl font-black text-emerald-700 mono">₹0</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>Total Inward Bills:</span>
+                        <span id="kpiTotalPurchasesCount" class="font-bold text-slate-800 mono">0 bills</span>
+                    </div>
+                </div>
+
+                <!-- Supplier Payables Due -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Supplier Payables (Due)</span>
+                        <div class="p-2 rounded-xl bg-rose-50 text-rose-600">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span id="kpiSupplierPayablesDue" class="text-2xl sm:text-3xl font-black text-rose-600 mono">₹0</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>Pending Vendor Bills:</span>
+                        <span id="kpiSupplierPayablesCount" class="font-bold text-slate-800 mono">0 bills</span>
+                    </div>
+                </div>
+
+                <!-- Materials Inwarded -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-sm transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Materials Inwarded</span>
+                        <div class="p-2 rounded-xl bg-amber-50 text-amber-600">
+                            <i data-lucide="boxes" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <span id="kpiTotalUnitsInwarded" class="text-2xl sm:text-3xl font-black text-slate-900 mono">0</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-100 pt-2">
+                        <span>Active Suppliers / Depots:</span>
+                        <span id="kpiActiveSuppliersCount" class="font-bold text-slate-800">0 vendors</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search & Filters -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto flex-1">
+                    <div class="relative w-full md:w-80">
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="purchaseSearchInput" oninput="renderPurchasesTable()" placeholder="Search supplier, invoice #, truck #, material..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </div>
+
+                    <!-- Supplier Filter -->
+                    <select id="purchaseSupplierFilter" onchange="renderPurchasesTable()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700">
+                        <option value="All">All Suppliers / Depots</option>
+                        <!-- Populated dynamically -->
+                    </select>
+
+                    <!-- Payment Status Filter -->
+                    <select id="purchasePaymentStatusFilter" onchange="renderPurchasesTable()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700">
+                        <option value="All">All Payment Statuses</option>
+                        <option value="Paid">Paid in Full</option>
+                        <option value="Credit">Credit / Payable (Unpaid)</option>
+                        <option value="Partial">Partial Paid</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Purchases Table -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 uppercase font-bold border-b border-slate-200 text-[11px]">
+                                <th class="py-3 px-4">Purchase Ref & Date</th>
+                                <th class="py-3 px-3">Manufacturer / Supplier</th>
+                                <th class="py-3 px-3">Vehicle / Lorry #</th>
+                                <th class="py-3 px-3">Inward Items & Quantities</th>
+                                <th class="py-3 px-3">Total Amount</th>
+                                <th class="py-3 px-3">Payment & Status</th>
+                                <th class="py-3 px-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="purchasesTableBody" class="divide-y divide-slate-100 font-medium">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
         <!-- ========================================================================= -->
@@ -1339,6 +1547,295 @@
         </div>
     </div>
 
+    <!-- ========================================================================= -->
+    <!-- MODAL: CREATE NEW PURCHASE INVOICE & INWARD STOCK (MULTI-ITEM)            -->
+    <!-- ========================================================================= -->
+    <div id="newPurchaseModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[130] hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white max-w-3xl w-full rounded-3xl shadow-2xl border border-slate-200 p-6 space-y-4 my-8 animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] flex flex-col justify-between">
+            <div class="flex justify-between items-start pb-3 border-b border-slate-100 shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="p-2.5 rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <i data-lucide="package-plus" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-base font-extrabold text-slate-900">New Purchase Invoice & Inward Stock</h4>
+                        <p class="text-xs text-slate-500">Record factory / C&F inward shipments and auto-update godown inventory</p>
+                    </div>
+                </div>
+                <button onclick="closeNewPurchaseModal()" class="text-slate-400 hover:text-slate-700 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="handleSavePurchase(event)" class="space-y-4 text-xs overflow-y-auto pr-1 flex-1 custom-scrollbar">
+                <!-- Supplier Info -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="font-black text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
+                            <i data-lucide="building" class="w-3.5 h-3.5 text-emerald-600"></i> Manufacturer / C&F Supplier Details
+                        </span>
+                        <div class="flex items-center gap-1">
+                            <span class="text-[10px] text-slate-500">Quick Fill:</span>
+                            <button type="button" onclick="setPurchaseSupplierQuick('UltraTech Cement Regional Depot (Shamshabad Hub)', '9440012345')" class="px-2 py-0.5 rounded bg-white hover:bg-slate-200 border border-slate-200 text-[10px] font-bold text-slate-700">UltraTech</button>
+                            <button type="button" onclick="setPurchaseSupplierQuick('Maha Cement C&F (My Home Industries Ltd)', '9848098765')" class="px-2 py-0.5 rounded bg-white hover:bg-slate-200 border border-slate-200 text-[10px] font-bold text-slate-700">Maha</button>
+                            <button type="button" onclick="setPurchaseSupplierQuick('Astral Pipes & Fittings C&F Depot Hyderabad', '9988776655')" class="px-2 py-0.5 rounded bg-white hover:bg-slate-200 border border-slate-200 text-[10px] font-bold text-slate-700">Astral</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="block font-bold text-slate-700 mb-1">Supplier / Factory Name *</label>
+                            <input type="text" id="purchModalSupplierName" required placeholder="e.g. UltraTech Cement Regional Depot Hyderabad" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-900 focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Supplier Contact / Phone</label>
+                            <input type="text" id="purchModalSupplierPhone" placeholder="e.g. 9849012345" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl mono font-semibold">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Vendor Invoice / Challan #</label>
+                            <input type="text" id="purchModalInvoiceRef" placeholder="e.g. INV-9982 / DC-3321" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl mono font-semibold">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Vehicle / Lorry #</label>
+                            <input type="text" id="purchModalVehicleNo" placeholder="e.g. TS 09 UB 4421" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl mono font-bold uppercase">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Inward Date *</label>
+                            <input type="date" id="purchModalDate" required class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-800">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inward Line Items -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-black text-slate-900 uppercase text-[11px] flex items-center gap-1.5">
+                            <i data-lucide="boxes" class="w-3.5 h-3.5 text-amber-500"></i> Inward Materials / Items (Updates Stock)
+                        </span>
+                        <button type="button" onclick="addPurchaseModalLineItem()" class="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 rounded-lg font-bold text-xs flex items-center gap-1 border border-teal-200">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> + Add Item Line
+                        </button>
+                    </div>
+
+                    <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[10px]">
+                                <tr>
+                                    <th class="py-2.5 px-3">Product / Cement Brand</th>
+                                    <th class="py-2.5 px-2 w-28 text-center">Inward Qty</th>
+                                    <th class="py-2.5 px-2 w-32 text-right">Purchase Rate (₹)</th>
+                                    <th class="py-2.5 px-3 w-32 text-right">Total (₹)</th>
+                                    <th class="py-2.5 px-2 w-10 text-center"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchModalItemsBody" class="divide-y divide-slate-100 font-medium">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Payment, Taxes & Totals -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Payment Status *</label>
+                                <select id="purchModalPaymentStatus" onchange="handlePurchasePaymentStatusChange()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-bold text-slate-900">
+                                    <option value="Paid" selected>Paid in Full</option>
+                                    <option value="Credit">Credit / Pay Later (Due)</option>
+                                    <option value="Partial">Partial Payment</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Payment Mode</label>
+                                <select id="purchModalPaymentMode" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-semibold text-slate-800">
+                                    <option value="Bank Transfer / RTGS" selected>Bank Transfer / RTGS</option>
+                                    <option value="UPI">UPI / NetBanking</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Cheque">Cheque</option>
+                                    <option value="Vendor Khata / Credit">Vendor Khata / Credit</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="purchModalPaidRow" class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Amount Paid (₹)</label>
+                                <input type="number" id="purchModalPaidAmount" oninput="recalculatePurchaseModalTotals()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-black mono text-emerald-700">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-700 mb-1">Balance Due (₹)</label>
+                                <input type="number" id="purchModalBalanceDue" readonly class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl font-black mono text-rose-600">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Remarks / Godown Unloading Bay</label>
+                            <input type="text" id="purchModalNotes" placeholder="e.g. Unloaded 250 bags at Godown Bay 1 by trailer" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl font-medium">
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 flex flex-col justify-between space-y-2">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center text-slate-600 font-semibold">
+                                <span>Subtotal:</span>
+                                <span id="purchModalSubtotal" class="font-bold mono text-slate-900">₹0</span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-600">
+                                <label class="flex items-center gap-1.5 cursor-pointer">
+                                    <input type="checkbox" id="purchModalApplyGst" onchange="recalculatePurchaseModalTotals()" class="rounded text-teal-600 focus:ring-teal-500">
+                                    <span class="font-bold text-xs">Include GST (18% / 28%)</span>
+                                </label>
+                                <span id="purchModalGstAmount" class="font-bold mono text-slate-900">₹0</span>
+                            </div>
+                            <div class="flex justify-between items-center text-base font-black text-slate-900 border-t border-slate-200 pt-2">
+                                <span>Grand Total:</span>
+                                <span id="purchModalGrandTotal" class="font-black mono text-lg text-teal-800">₹0</span>
+                            </div>
+                        </div>
+
+                        <div class="p-2 bg-emerald-50 rounded-lg text-[10px] text-emerald-800 font-medium flex items-center gap-1.5 border border-emerald-100">
+                            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                            <span>Stock counts in godown will automatically increase upon saving!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100 shrink-0">
+                    <button type="button" onclick="closeNewPurchaseModal()" class="px-4 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-bold">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-600 text-white font-extrabold shadow-sm shadow-teal-700/20 flex items-center gap-1.5">
+                        <i data-lucide="check" class="w-4 h-4"></i> Save Purchase & Inward Stock
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAL: PRINTABLE GOODS RECEIPT NOTE (GRN) & PURCHASE INVOICE SLIP          -->
+    <!-- ========================================================================= -->
+    <div id="purchaseReceiptModal" class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-[130] hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white max-w-2xl w-full rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col my-8">
+            
+            <div class="p-4 bg-slate-900 text-white flex justify-between items-center no-print">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="printer" class="w-4 h-4 text-amber-400"></i>
+                    <span class="text-xs font-bold">KARNI BUILTMART • Goods Receipt Note (GRN) & Inward Slip</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.print()" class="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-lg transition shadow-xs flex items-center gap-1">
+                        <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print GRN Slip
+                    </button>
+                    <button onclick="closePurchaseReceiptModal()" class="text-slate-400 hover:text-white p-1">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Actual Print Area -->
+            <div id="printPurchaseArea" class="p-8 space-y-6 text-slate-900 bg-white">
+                <!-- Header -->
+                <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-black tracking-tight text-slate-900">KARNI BUILTMART</h2>
+                        <p class="text-xs font-bold text-slate-700 mt-0.5">Authorised Distributors: UltraTech, Maha, Nagarjuna, KCP Cement, CPVC Pipes & Sanitary</p>
+                        <p class="text-[11px] text-slate-600">Shop No 5-2-88, Ranigunj / Begum Bazar Main Road, Secunderabad - Hyderabad, Telangana • Mob: +91 98490 12345</p>
+                        <p class="text-[11px] text-slate-700 font-semibold mono">GSTIN: 36AABCS9820M1ZQ (Telangana State - Code 36)</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="inline-block px-2.5 py-1 bg-emerald-800 text-white text-[10px] font-black uppercase rounded tracking-wider">GOODS RECEIPT NOTE (GRN)</span>
+                        <div class="mt-2 text-xs font-bold mono">
+                            <div>GRN Ref: <span id="grnPrintNo">PUR-2026-001</span></div>
+                            <div class="text-slate-500 font-medium">Date: <span id="grnPrintDate">2026-08-28</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supplier Details -->
+                <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                    <div>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Received From / Supplier:</span>
+                        <div id="grnPrintSupplierName" class="font-extrabold text-slate-900 text-sm">UltraTech Cement Regional Depot</div>
+                        <div id="grnPrintSupplierPhone" class="text-slate-600 font-semibold mono">+91 9440012345</div>
+                        <div id="grnPrintInvoiceRef" class="text-[10px] text-teal-700 font-bold">Inv: UT-DEP-HYD-98214</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block">Inward Logistics & Status:</span>
+                        <div id="grnPrintVehicleNo" class="font-bold text-slate-900 mono">Truck: TS 09 UB 4421</div>
+                        <div id="grnPrintPaymentStatus" class="text-[11px] font-bold text-emerald-700 mt-1">Paid in Full (Bank Transfer)</div>
+                        <div id="grnPrintNotes" class="text-[10px] text-slate-500 italic mt-0.5"></div>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="border-y-2 border-slate-900 text-slate-900 font-black uppercase text-[10px]">
+                                <th class="py-2">#</th>
+                                <th class="py-2">Inward Item Description</th>
+                                <th class="py-2 text-center">Inward Qty</th>
+                                <th class="py-2 text-right">Cost Rate (₹)</th>
+                                <th class="py-2 text-right">Total Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grnPrintItemsBody" class="divide-y divide-slate-200 font-medium">
+                            <!-- Items -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Summary Totals -->
+                <div class="border-t-2 border-slate-900 pt-3 flex justify-between items-start text-xs">
+                    <div class="max-w-xs text-[10px] text-slate-500 space-y-1">
+                        <p class="font-bold text-slate-700">Verification & Quality Check:</p>
+                        <p>1. Bags & materials inspected for moisture, tears and packaging seal.</p>
+                        <p>2. Stock successfully credited to Hyderabad Godown inventory.</p>
+                    </div>
+                    <div class="w-64 space-y-1 text-right">
+                        <div class="flex justify-between text-slate-600 font-medium">
+                            <span>Subtotal:</span>
+                            <span id="grnPrintSubtotal" class="font-bold mono text-slate-900">₹0</span>
+                        </div>
+                        <div id="grnPrintGstRow" class="flex justify-between text-slate-600 font-medium hidden">
+                            <span>GST Tax:</span>
+                            <span id="grnPrintGst" class="font-bold mono text-slate-900">₹0</span>
+                        </div>
+                        <div class="flex justify-between text-sm font-black text-slate-900 pt-2 border-t border-slate-300">
+                            <span>Total Inward Value:</span>
+                            <span id="grnPrintGrandTotal" class="mono text-base">₹0</span>
+                        </div>
+                        <div class="flex justify-between text-xs font-bold text-emerald-700">
+                            <span>Amount Paid:</span>
+                            <span id="grnPrintPaid" class="mono">₹0</span>
+                        </div>
+                        <div id="grnPrintDueRow" class="flex justify-between text-xs font-bold text-rose-600 hidden">
+                            <span>Supplier Balance Due:</span>
+                            <span id="grnPrintDue" class="mono">₹0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signatures -->
+                <div class="pt-8 flex justify-between items-end text-center text-xs">
+                    <div>
+                        <div class="w-32 border-b border-slate-400 mx-auto"></div>
+                        <span class="text-[10px] text-slate-500 mt-1 block">Driver / Transporter Signature</span>
+                    </div>
+                    <div>
+                        <div class="w-36 border-b border-slate-400 mx-auto"></div>
+                        <span class="text-[10px] font-bold text-slate-800 mt-1 block">For KARNI BUILTMART</span>
+                        <span class="text-[9px] font-bold text-slate-600 block">Godown Manager / Receiver</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Global App Footer -->
     <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-12 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -1392,7 +1889,7 @@
             { id: 'c_7', name: 'ACC Concrete+ Power Cement (50kg Bag)', brand: 'ACC', size: 'Super Grade / Composite', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 180, costPrice: 340, sellPrice: 380, wholesalePrice: 365, minStock: 50, location: 'Godown Bay 4', hsn: '2523', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80' },
             { id: 'c_8', name: 'Penna Suraksha Power Cement 50kg', brand: 'Penna Cement', size: 'PPC (Portland Pozzolana)', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 150, costPrice: 315, sellPrice: 355, wholesalePrice: 340, minStock: 40, location: 'Godown Bay 4', hsn: '2523', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=300&auto=format&fit=crop&q=80' },
             { id: 'c_9', name: 'Zuari Super Cement (50kg Bag)', brand: 'Zuari Cement', size: 'PPC (Portland Pozzolana)', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 120, costPrice: 310, sellPrice: 350, wholesalePrice: 335, minStock: 40, location: 'Godown Bay 5', hsn: '2523', image: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?w=300&auto=format&fit=crop&q=80' },
-            { id: 'c_10', name: 'Dalmia DSP Cement (50kg Dhalai Special)', brand: 'Dalmia Cement', size: 'Super Grade / Composite', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 110, costPrice: 350, sellPrice: 395, wholesalePrice: 380, minStock: 30, location: 'Godown Bay 5', hsn: '2523', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&auto=format&fit=crop&q=80' },
+            { id: 'c_10', name: 'Dalmia DSP Cement (50kg Dhalai Special)', brand: 'Dalmia Cement', size: 'Super Grade / Composite', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 14, costPrice: 350, sellPrice: 395, wholesalePrice: 380, minStock: 30, location: 'Godown Bay 5', hsn: '2523', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=300&auto=format&fit=crop&q=80' },
             { id: 'c_11', name: 'Birla A1 StrongCrete / Orient Gold 50kg', brand: 'Orient / Birla A1', size: 'OPC 53 Grade', category: 'Cement Bags (50kg)', unit: 'Bags (50kg)', stock: 90, costPrice: 330, sellPrice: 370, wholesalePrice: 355, minStock: 30, location: 'Godown Bay 5', hsn: '2523', image: 'https://images.unsplash.com/photo-1541888946425-d0fbb186156a?w=300&auto=format&fit=crop&q=80' },
 
             // WHITE CEMENT & PUTTY
@@ -1402,14 +1899,87 @@
 
             // CONSTRUCTION CHEMICALS & WATERPROOFING
             { id: 'ch_1', name: 'Dr. Fixit 101 LW+ Integral Waterproofing (5 Ltr)', brand: 'Dr. Fixit / Pidilite', size: '5 Ltr Can', category: 'Construction Chemicals', unit: 'Cans', stock: 45, costPrice: 520, sellPrice: 690, wholesalePrice: 620, minStock: 10, location: 'Rack CH-1', hsn: '3824', image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=300&auto=format&fit=crop&q=80' },
-            { id: 'ch_2', name: 'Dr. Fixit 101 LW+ Integral Waterproofing (20 Ltr Drum)', brand: 'Dr. Fixit / Pidilite', size: '20 Ltr Bucket', category: 'Construction Chemicals', unit: 'Buckets', stock: 22, costPrice: 1950, sellPrice: 2450, wholesalePrice: 2250, minStock: 5, location: 'Rack CH-2', hsn: '3824', image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=300&auto=format&fit=crop&q=80' },
+            { id: 'ch_2', name: 'Dr. Fixit 101 LW+ Integral Waterproofing (20 Ltr Drum)', brand: 'Dr. Fixit / Pidilite', size: '20 Ltr Bucket', category: 'Construction Chemicals', unit: 'Buckets', stock: 3, costPrice: 1950, sellPrice: 2450, wholesalePrice: 2250, minStock: 5, location: 'Rack CH-2', hsn: '3824', image: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=300&auto=format&fit=crop&q=80' },
             { id: 'ch_3', name: 'Roff T01 Tile Adhesive Powder (20kg Bag)', brand: 'Dr. Fixit / Pidilite', size: 'Standard / Universal', category: 'Construction Chemicals', unit: 'Bags (25kg)', stock: 75, costPrice: 240, sellPrice: 320, wholesalePrice: 290, minStock: 20, location: 'Rack CH-3', hsn: '3824', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=300&auto=format&fit=crop&q=80' },
 
             // CPVC PIPES & FITTINGS
-            { id: 'pl_1', name: 'Astral CPVC Pipe 1" SDR 11 (3 Meter Length)', brand: 'Astral', size: '1 inch (25mm)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 110, costPrice: 280, sellPrice: 380, wholesalePrice: 340, minStock: 20, location: 'Pipe Rack A-1', hsn: '3917', image: 'https://images.unsplash.com/photo-1542013936693-884638332954?w=300&auto=format&fit=crop&q=80' },
+            { id: 'pl_1', name: 'Astral CPVC Pipe 1" SDR 11 (3 Meter Length)', brand: 'Astral', size: '1 inch (25mm)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 12, costPrice: 280, sellPrice: 380, wholesalePrice: 340, minStock: 20, location: 'Pipe Rack A-1', hsn: '3917', image: 'https://images.unsplash.com/photo-1542013936693-884638332954?w=300&auto=format&fit=crop&q=80' },
             { id: 'pl_2', name: 'Ashirvad CPVC Pipe 3/4" SDR 11 (3 Meter)', brand: 'Ashirvad', size: '3/4 inch (20mm)', category: 'CPVC Pipes & SDR', unit: 'Lengths', stock: 140, costPrice: 195, sellPrice: 265, wholesalePrice: 240, minStock: 30, location: 'Pipe Rack A-2', hsn: '3917', image: 'https://images.unsplash.com/photo-1542013936693-884638332954?w=300&auto=format&fit=crop&q=80' },
             { id: 'pl_3', name: 'Astral CPVC Brass Elbow 3/4" x 1/2" Female', brand: 'Astral', size: '3/4 inch (20mm)', category: 'CPVC Fittings', unit: 'Pcs', stock: 240, costPrice: 62, sellPrice: 88, wholesalePrice: 78, minStock: 50, location: 'Bin B-12', hsn: '3917', image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=300&auto=format&fit=crop&q=80' },
             { id: 'pl_4', name: 'Jaquar CP Brass Bib Cock Tap (Foam Flow)', brand: 'Jaquar', size: '1/2 inch (15mm)', category: 'CP Bathroom Fittings', unit: 'Pcs', stock: 45, costPrice: 290, sellPrice: 450, wholesalePrice: 390, minStock: 10, location: 'Showcase S-1', hsn: '8481', image: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300&auto=format&fit=crop&q=80' }
+        ];
+
+        // Sample Initial Purchases for KARNI BUILTMART Hyderabad
+        const INITIAL_PURCHASES = [
+            {
+                purchaseNo: 'PUR-2026-001',
+                date: getTodayDateString(),
+                supplierName: 'UltraTech Cement Regional Depot (Shamshabad Hub)',
+                supplierPhone: '9440012345',
+                supplierGstin: '36AAACU5821P1ZT',
+                invoiceRef: 'UT-DEP-HYD-98214',
+                vehicleNo: 'TS 09 UB 4421',
+                paymentStatus: 'Paid',
+                paymentMode: 'Bank Transfer / RTGS',
+                items: [
+                    { productId: 'c_1', name: 'UltraTech Super Cement (50kg Bag) PPC', qty: 250, rate: 345, total: 86250 },
+                    { productId: 'c_2', name: 'UltraTech Weather Pro (50kg Water-Shield)', qty: 100, rate: 380, total: 38000 }
+                ],
+                subtotal: 124250,
+                applyGst: false,
+                gstRate: 0,
+                gstAmount: 0,
+                grandTotal: 124250,
+                paidAmount: 124250,
+                balanceDue: 0,
+                notes: 'Cement trailer unloaded at Godown Bay 1'
+            },
+            {
+                purchaseNo: 'PUR-2026-002',
+                date: getTodayDateString(),
+                supplierName: 'Maha Cement C&F (My Home Industries Ltd)',
+                supplierPhone: '9848098765',
+                supplierGstin: '36AAACM1122Q1ZV',
+                invoiceRef: 'MAHA-DC-4402',
+                vehicleNo: 'AP 16 TX 7788',
+                paymentStatus: 'Credit',
+                paymentMode: 'Vendor Khata / Credit',
+                items: [
+                    { productId: 'c_3', name: 'Maha Solid Cement 50kg Bag (My Home)', qty: 200, rate: 325, total: 65000 },
+                    { productId: 'c_4', name: 'Maha HD OPC 53 Grade (50kg Bag)', qty: 100, rate: 345, total: 34500 }
+                ],
+                subtotal: 99500,
+                applyGst: false,
+                gstRate: 0,
+                gstAmount: 0,
+                grandTotal: 99500,
+                paidAmount: 0,
+                balanceDue: 99500,
+                notes: 'Payment due in 15 days as per dealer credit terms'
+            },
+            {
+                purchaseNo: 'PUR-2026-003',
+                date: getTodayDateString(),
+                supplierName: 'Astral Pipes & Fittings C&F Depot Hyderabad',
+                supplierPhone: '9988776655',
+                supplierGstin: '36AAACA4321K1ZM',
+                invoiceRef: 'AST-INV-5512',
+                vehicleNo: 'TS 08 YA 1290',
+                paymentStatus: 'Paid',
+                paymentMode: 'UPI',
+                items: [
+                    { productId: 'pl_1', name: 'Astral CPVC Pipe 1" SDR 11 (3 Meter Length)', qty: 80, rate: 280, total: 22400 },
+                    { productId: 'pl_3', name: 'Astral CPVC Brass Elbow 3/4" x 1/2" Female', qty: 150, rate: 62, total: 9300 }
+                ],
+                subtotal: 31700,
+                applyGst: false,
+                gstRate: 0,
+                gstAmount: 0,
+                grandTotal: 31700,
+                paidAmount: 31700,
+                balanceDue: 0,
+                notes: 'Received in good condition at Pipe Rack A-1'
+            }
         ];
 
         // Sample Initial Sales for Karni Builtmart Hyderabad
@@ -1457,9 +2027,11 @@
         // State variables
         let currentUser = null;
         let inventory = [];
+        let purchases = [];
         let sales = [];
         let khataPayments = [];
         let currentPosLines = [];
+        let currentPurchaseLines = [];
         let activeInvCategory = 'All';
         let activePosCatalogCategory = 'All';
         let inventoryViewMode = 'table';
@@ -1507,6 +2079,15 @@
                 saveInventory();
             }
 
+            // Load Purchases
+            const savedPurchases = localStorage.getItem('karni_purchases') || localStorage.getItem('sarda_purchases');
+            if (savedPurchases) {
+                purchases = JSON.parse(savedPurchases);
+            } else {
+                purchases = [...INITIAL_PURCHASES];
+                savePurchases();
+            }
+
             // Load Sales
             const savedSales = localStorage.getItem('karni_sales') || localStorage.getItem('sarda_sales');
             if (savedSales) {
@@ -1526,10 +2107,15 @@
             }
 
             renderPresetGallery();
+            updateLowStockUI();
         }
 
         function saveInventory() {
             localStorage.setItem('karni_inventory', JSON.stringify(inventory));
+        }
+
+        function savePurchases() {
+            localStorage.setItem('karni_purchases', JSON.stringify(purchases));
         }
 
         function saveSales() {
@@ -1675,6 +2261,8 @@
                 renderPosCatalog();
             } else if (viewId === 'inventory') {
                 renderInventoryTable();
+            } else if (viewId === 'purchases') {
+                renderPurchasesView();
             } else if (viewId === 'khata') {
                 renderKhataAccounts();
             } else if (viewId === 'reports') {
@@ -1683,7 +2271,7 @@
         }
 
         // =========================================================================
-        // DASHBOARD LOGIC
+        // DASHBOARD LOGIC & LOW STOCK UI SYNC
         // =========================================================================
         function renderDashboard() {
             const todayStr = getTodayDateString();
@@ -1721,100 +2309,100 @@
             document.getElementById('kpiStockItemsCount').innerText = `${totalStockItemsCount} units/bags`;
 
             renderRecentSalesTable();
-            renderLowStockAlerts();
+            updateLowStockUI();
             renderDashboardCharts();
         }
 
-        function renderRecentSalesTable() {
-            const tbody = document.getElementById('recentSalesTableBody');
-            tbody.innerHTML = '';
-
-            const sorted = [...sales].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-
-            if (sorted.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">No sales recorded today. Click + Quick Sale to create your first dispatch invoice!</td></tr>`;
-                return;
+        function updateLowStockUI() {
+            const lowItems = inventory.filter(i => i.stock <= i.minStock);
+            
+            // 1. Navigation Badges
+            const stockBadge = document.getElementById('lowStockBadge');
+            const purchBadge = document.getElementById('lowStockPurchaseBadge');
+            if (stockBadge) {
+                if (lowItems.length > 0) {
+                    stockBadge.innerText = lowItems.length;
+                    stockBadge.classList.remove('hidden');
+                } else {
+                    stockBadge.classList.add('hidden');
+                }
+            }
+            if (purchBadge) {
+                if (lowItems.length > 0) {
+                    purchBadge.innerText = lowItems.length;
+                    purchBadge.classList.remove('hidden');
+                } else {
+                    purchBadge.classList.add('hidden');
+                }
             }
 
-            sorted.forEach(s => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition';
+            // 2. Global Top Alert Banner
+            const globalBanner = document.getElementById('globalLowStockBanner');
+            if (globalBanner) {
+                if (lowItems.length > 0) {
+                    globalBanner.classList.remove('hidden');
+                    const countTxt = document.getElementById('globalLowStockCountText');
+                    const summaryTxt = document.getElementById('globalLowStockSummary');
+                    if (countTxt) countTxt.innerText = `${lowItems.length} Products Below Minimum Godown Buffer!`;
+                    if (summaryTxt) {
+                        const names = lowItems.slice(0, 3).map(i => i.name.split('(')[0].trim()).join(', ');
+                        const extra = lowItems.length > 3 ? ` +${lowItems.length - 3} more` : '';
+                        summaryTxt.innerText = `Urgent reorder needed: ${names}${extra}`;
+                    }
+                } else {
+                    globalBanner.classList.add('hidden');
+                }
+            }
 
-                const isCredit = s.balanceDue > 0;
-                const statusBadge = isCredit 
-                    ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Due: ${formatINR(s.balanceDue)}</span>`
-                    : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Paid Full</span>`;
+            // 3. Inventory Low Stock Pill Count
+            const invPill = document.getElementById('invLowStockCountPill');
+            if (invPill) {
+                invPill.innerText = lowItems.length;
+            }
 
-                tr.innerHTML = `
-                    <td class="py-2.5 px-3">
-                        <span class="font-bold text-slate-900 mono block">${s.invoiceNo}</span>
-                        <span class="text-[10px] text-slate-400">${s.date}</span>
-                    </td>
-                    <td class="py-2.5 px-3">
-                        <span class="font-bold text-slate-800 block">${s.customerName}</span>
-                        <span class="text-[10px] text-slate-400">${s.customerPhone || 'Hyderabad Site'}</span>
-                    </td>
-                    <td class="py-2.5 px-3 font-semibold text-slate-600">${s.items.length} items</td>
-                    <td class="py-2.5 px-3 font-bold text-slate-900 mono">${formatINR(s.grandTotal)}</td>
-                    <td class="py-2.5 px-3">
-                        ${statusBadge}
-                    </td>
-                    <td class="py-2.5 px-3 text-right">
-                        <button onclick="previewInvoice('${s.invoiceNo}')" class="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-slate-100 rounded-lg transition" title="Print Invoice">
-                            <i data-lucide="printer" class="w-4 h-4"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+            // 4. Dashboard Low Stock List
+            const dashContainer = document.getElementById('lowStockItemsList');
+            if (dashContainer) {
+                dashContainer.innerHTML = '';
+                if (lowItems.length === 0) {
+                    dashContainer.innerHTML = `
+                        <div class="py-8 text-center text-slate-400">
+                            <i data-lucide="check-circle" class="w-8 h-8 text-teal-400 mx-auto mb-1"></i>
+                            <p class="text-xs font-bold text-slate-600">All cement & materials well stocked!</p>
+                        </div>
+                    `;
+                } else {
+                    lowItems.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'py-2 flex items-center justify-between gap-2 border-b border-slate-50 last:border-0';
+                        const isCritical = item.stock === 0 || item.stock <= Math.floor(item.minStock / 2);
+                        div.innerHTML = `
+                            <div class="flex items-center gap-2">
+                                <img src="${item.image || PRESET_PRODUCT_IMAGES[0].url}" alt="" class="w-8 h-8 rounded-lg object-cover bg-slate-100 shrink-0">
+                                <div>
+                                    <span class="font-bold text-slate-900 text-xs block leading-tight">${item.name}</span>
+                                    <span class="text-[10px] text-slate-400">${item.brand} • ${item.location || 'Godown'}</span>
+                                </div>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-black ${isCritical ? 'bg-rose-600 text-white' : 'bg-rose-100 text-rose-700'} mono block">
+                                    ${item.stock} / ${item.minStock} ${item.unit}
+                                </span>
+                                <button onclick="openNewPurchaseModal('${item.id}')" class="text-[10px] font-bold text-teal-700 hover:underline mt-0.5 block">+ Purchase</button>
+                            </div>
+                        `;
+                        dashContainer.appendChild(div);
+                    });
+                }
+            }
 
+            // 5. Purchase Panel Low Stock Reorder Widget
+            renderPurchaseLowStockWidget();
             lucide.createIcons();
         }
 
         function renderLowStockAlerts() {
-            const container = document.getElementById('lowStockItemsList');
-            container.innerHTML = '';
-
-            const lowItems = inventory.filter(i => i.stock <= i.minStock);
-            const badge = document.getElementById('lowStockBadge');
-            if (lowItems.length > 0) {
-                badge.innerText = lowItems.length;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
-
-            if (lowItems.length === 0) {
-                container.innerHTML = `
-                    <div class="py-8 text-center text-slate-400">
-                        <i data-lucide="check-circle" class="w-8 h-8 text-teal-400 mx-auto mb-1"></i>
-                        <p class="text-xs font-bold text-slate-600">All cement & materials well stocked!</p>
-                    </div>
-                `;
-                lucide.createIcons();
-                return;
-            }
-
-            lowItems.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'py-2 flex items-center justify-between gap-2';
-                div.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <img src="${item.image || PRESET_PRODUCT_IMAGES[0].url}" alt="" class="w-8 h-8 rounded-lg object-cover bg-slate-100 shrink-0">
-                        <div>
-                            <span class="font-bold text-slate-900 text-xs block leading-tight">${item.name}</span>
-                            <span class="text-[10px] text-slate-400">${item.brand} • ${item.size || ''}</span>
-                        </div>
-                    </div>
-                    <div class="text-right shrink-0">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-black bg-rose-100 text-rose-700 mono block">
-                            ${item.stock} / ${item.minStock} ${item.unit}
-                        </span>
-                        <button onclick="quickAddStock('${item.id}')" class="text-[10px] font-bold text-teal-700 hover:underline mt-0.5 block">+ Inward</button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
+            updateLowStockUI();
         }
 
         function renderDashboardCharts() {
@@ -1974,13 +2562,14 @@
                 card.onclick = () => addProductToPosBill(item.id);
 
                 const isLow = item.stock <= item.minStock;
+                const isCritical = item.stock === 0 || item.stock <= Math.floor(item.minStock / 2);
 
                 card.innerHTML = `
                     <div>
                         <div class="w-full h-20 rounded-xl bg-white overflow-hidden relative mb-2 border border-slate-100">
                             <img src="${item.image || PRESET_PRODUCT_IMAGES[0].url}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-200">
-                            <span class="absolute top-1 right-1 text-[9px] font-black px-1.5 py-0.2 rounded-md ${isLow ? 'bg-rose-500 text-white' : 'bg-slate-900/80 text-white'}">
-                                ${item.stock} ${item.unit}
+                            <span class="absolute top-1 right-1 text-[9px] font-black px-1.5 py-0.2 rounded-md ${isCritical ? 'bg-rose-600 text-white animate-pulse' : (isLow ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-900/80 text-white')}">
+                                ${item.stock} ${item.unit} ${isCritical ? '🚨 LOW' : (isLow ? '⚠️' : '')}
                             </span>
                         </div>
                         <span class="text-[9px] font-bold text-amber-700 uppercase tracking-wider block">${item.brand}</span>
@@ -2005,7 +2594,11 @@
                 recomputeLineTotal(existingLine);
                 renderPosLines();
                 calculatePosTotals();
-                showToast(`+1 ${prod.name} added to bill`);
+                if (prod.stock <= prod.minStock) {
+                    showToast(`+1 ${prod.name} (⚠️ Low Stock: ${prod.stock} left)`);
+                } else {
+                    showToast(`+1 ${prod.name} added to bill`);
+                }
                 return;
             }
 
@@ -2028,7 +2621,11 @@
 
             renderPosLines();
             calculatePosTotals();
-            showToast(`${prod.name} added!`);
+            if (prod.stock <= prod.minStock) {
+                showToast(`Added ${prod.name}! ⚠️ Note: Godown stock is low (${prod.stock} ${prod.unit} left)`);
+            } else {
+                showToast(`${prod.name} added!`);
+            }
         }
 
         function addPosLineItem() {
@@ -2294,8 +2891,13 @@
         function filterInventoryCategory(cat) {
             activeInvCategory = cat;
             document.querySelectorAll('.inv-filter').forEach(btn => {
-                if (btn.innerText === cat || (cat === 'All' && btn.innerText === 'All')) {
+                const isMatch = (btn.id === 'invFilterLowStockBtn' && cat === 'LowStock') ||
+                                (cat === 'All' && btn.innerText.trim() === 'All') ||
+                                (btn.innerText.trim() === cat);
+                if (isMatch) {
                     btn.className = 'inv-filter active-inv-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white transition';
+                } else if (btn.id === 'invFilterLowStockBtn') {
+                    btn.className = 'inv-filter px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition flex items-center gap-1';
                 } else {
                     btn.className = 'inv-filter px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition';
                 }
@@ -2308,7 +2910,8 @@
             const brandFilter = document.getElementById('inventoryBrandFilter').value;
 
             const filtered = inventory.filter(item => {
-                const matchCat = (activeInvCategory === 'All' || item.category === activeInvCategory);
+                const matchCat = (activeInvCategory === 'All') ||
+                                 (activeInvCategory === 'LowStock' ? (item.stock <= item.minStock) : (item.category === activeInvCategory));
                 const matchBrand = (brandFilter === 'All' || item.brand.toLowerCase().includes(brandFilter.toLowerCase()));
                 const matchQuery = item.name.toLowerCase().includes(query) || 
                                    (item.hsn && item.hsn.includes(query)) || 
@@ -2326,10 +2929,16 @@
             } else {
                 filtered.forEach(item => {
                     const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-50 transition';
-
                     const isLow = item.stock <= item.minStock;
+                    const isCritical = item.stock === 0 || item.stock <= Math.floor(item.minStock / 2);
                     const totalVal = item.stock * item.costPrice;
+
+                    tr.className = isCritical 
+                        ? 'bg-rose-50/50 hover:bg-rose-50/90 transition border-l-4 border-l-rose-600'
+                        : (isLow ? 'bg-amber-50/40 hover:bg-amber-50/80 transition border-l-4 border-l-amber-500' : 'hover:bg-slate-50 transition');
+
+                    const pct = Math.min(100, Math.max(5, Math.round((item.stock / (item.minStock * 2 || 1)) * 100)));
+                    const barColor = isCritical ? 'bg-rose-600' : (isLow ? 'bg-amber-500' : 'bg-emerald-500');
 
                     tr.innerHTML = `
                         <td class="py-3 px-4">
@@ -2345,17 +2954,25 @@
                             <span class="font-bold text-amber-700 block">${item.brand}</span>
                             <span class="text-[10px] text-slate-500">${item.category}</span>
                         </td>
-                        <td class="py-3 px-3 font-semibold text-slate-700">${item.size || 'PPC'}</td>
+                        <td class="py-3 px-3 font-semibold text-slate-700">${item.size || 'Standard'}</td>
                         <td class="py-3 px-3 font-medium text-slate-500">${item.location || 'Godown'}</td>
                         <td class="py-3 px-3">
-                            <span class="font-black mono ${isLow ? 'text-rose-600' : 'text-slate-900'}">${item.stock} ${item.unit}</span>
-                            ${isLow ? '<span class="block text-[9px] font-bold text-rose-500">Low Buffer</span>' : ''}
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-black mono text-sm ${isCritical ? 'text-rose-600' : (isLow ? 'text-amber-700' : 'text-slate-900')}">${item.stock} ${item.unit}</span>
+                                ${isCritical ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-black bg-rose-600 text-white uppercase animate-pulse">Critical</span>' : (isLow ? '<span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-100 text-amber-800">Low Stock</span>' : '')}
+                            </div>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <div class="w-16 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                                    <div class="h-full rounded-full ${barColor}" style="width: ${pct}%"></div>
+                                </div>
+                                <span class="text-[9px] text-slate-400 font-semibold">Min: ${item.minStock}</span>
+                            </div>
                         </td>
                         <td class="py-3 px-3 mono text-slate-500">${formatINR(item.costPrice)}</td>
                         <td class="py-3 px-3 mono font-bold text-teal-700">${formatINR(item.sellPrice)}</td>
                         <td class="py-3 px-3 mono font-semibold text-slate-800">${formatINR(totalVal)}</td>
                         <td class="py-3 px-4 text-right whitespace-nowrap">
-                            <button onclick="quickAddStock('${item.id}')" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 rounded-lg font-bold text-[11px] mr-1" title="Inward Stock">+ Stock</button>
+                            <button onclick="openNewPurchaseModal('${item.id}')" class="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 rounded-lg font-bold text-[11px] mr-1 border border-emerald-200" title="Inward via Purchase Panel">+ Inward</button>
                             <button onclick="openAddStockModal('${item.id}')" class="p-1.5 text-slate-500 hover:text-teal-600 hover:bg-slate-100 rounded-lg mr-1" title="Edit Product">
                                 <i data-lucide="edit" class="w-3.5 h-3.5"></i>
                             </button>
@@ -2374,16 +2991,19 @@
 
             filtered.forEach(item => {
                 const card = document.createElement('div');
-                card.className = "bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs hover:shadow-md transition flex flex-col justify-between space-y-3";
-
                 const isLow = item.stock <= item.minStock;
+                const isCritical = item.stock === 0 || item.stock <= Math.floor(item.minStock / 2);
+
+                card.className = isCritical 
+                    ? "bg-rose-50/30 p-4 rounded-3xl border-2 border-rose-400 shadow-2xs hover:shadow-md transition flex flex-col justify-between space-y-3"
+                    : (isLow ? "bg-amber-50/20 p-4 rounded-3xl border-2 border-amber-400 shadow-2xs hover:shadow-md transition flex flex-col justify-between space-y-3" : "bg-white p-4 rounded-3xl border border-slate-200 shadow-2xs hover:shadow-md transition flex flex-col justify-between space-y-3");
 
                 card.innerHTML = `
                     <div>
                         <div class="w-full h-36 rounded-2xl bg-slate-100 overflow-hidden relative mb-3 border border-slate-100">
                             <img src="${item.image || PRESET_PRODUCT_IMAGES[0].url}" alt="${item.name}" class="w-full h-full object-cover">
-                            <span class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-black ${isLow ? 'bg-rose-600 text-white' : 'bg-slate-900/80 text-white'}">
-                                ${item.stock} ${item.unit}
+                            <span class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-black ${isCritical ? 'bg-rose-600 text-white animate-pulse' : (isLow ? 'bg-amber-500 text-slate-950 font-black' : 'bg-slate-900/80 text-white')}">
+                                ${item.stock} ${item.unit} ${isCritical ? '🚨 CRITICAL' : (isLow ? '⚠️ LOW' : '')}
                             </span>
                             <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-white/90 text-amber-900 shadow-xs">
                                 ${item.brand}
@@ -2393,7 +3013,7 @@
                         <h4 class="font-bold text-slate-900 text-xs line-clamp-2 leading-tight">${item.name}</h4>
                         <div class="flex items-center justify-between text-[11px] text-slate-400 mt-1">
                             <span>${item.size || ''}</span>
-                            <span>Loc: ${item.location || 'Godown'}</span>
+                            <span>Min Buffer: ${item.minStock}</span>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-slate-100 text-xs">
@@ -2409,8 +3029,8 @@
                     </div>
 
                     <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
-                        <button onclick="quickAddStock('${item.id}')" class="flex-1 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold rounded-xl text-xs flex items-center justify-center gap-1">
-                            <i data-lucide="plus" class="w-3 h-3"></i> + Stock
+                        <button onclick="openNewPurchaseModal('${item.id}')" class="flex-1 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-bold rounded-xl text-xs flex items-center justify-center gap-1 border border-emerald-200">
+                            <i data-lucide="plus" class="w-3 h-3"></i> + Inward
                         </button>
                         <button onclick="openAddStockModal('${item.id}')" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl">
                             <i data-lucide="edit" class="w-3.5 h-3.5"></i>
@@ -2677,6 +3297,8 @@
             const prodId = document.getElementById('restockProductId').value;
             const qty = parseInt(document.getElementById('restockQty').value) || 0;
             const cost = parseFloat(document.getElementById('restockCost').value);
+            const supplier = document.getElementById('restockSupplier').value.trim() || 'UltraTech Depot Hyderabad';
+            const invoiceRef = document.getElementById('restockInvoiceRef').value.trim() || 'INW-' + Math.floor(1000 + Math.random() * 9000);
 
             const prod = inventory.find(p => p.id === prodId);
             if (!prod) return;
@@ -2686,18 +3308,601 @@
                 prod.costPrice = cost;
             }
 
+            // Also record into purchases
+            const purchaseNo = `PUR-2026-${String(purchases.length + 1).padStart(3, '0')}`;
+            const totalCost = qty * (prod.costPrice || 0);
+            purchases.unshift({
+                purchaseNo,
+                date: getTodayDateString(),
+                supplierName: supplier,
+                supplierPhone: '9440012345',
+                invoiceRef,
+                vehicleNo: 'TS 09 UB ' + Math.floor(1000 + Math.random() * 9000),
+                paymentStatus: 'Paid',
+                paymentMode: 'Cash / Bank',
+                items: [
+                    { productId: prod.id, name: prod.name, qty: qty, rate: prod.costPrice, total: totalCost }
+                ],
+                subtotal: totalCost,
+                applyGst: false,
+                gstRate: 0,
+                gstAmount: 0,
+                grandTotal: totalCost,
+                paidAmount: totalCost,
+                balanceDue: 0,
+                notes: 'Direct Inward Stock Entry'
+            });
+
+            savePurchases();
             saveInventory();
             closeRestockModal();
+            updateLowStockUI();
             renderInventoryTable();
             renderPosCatalog();
             renderDashboard();
+            renderPurchasesView();
             showToast(`Inward +${qty} ${prod.unit} for ${prod.name}! New stock: ${prod.stock}`);
         }
 
         function quickAddStock(productId) {
             const item = inventory.find(p => p.id === productId);
             if (!item) return;
-            openRestockModal(productId);
+            openNewPurchaseModal(productId);
+        }
+
+        // =========================================================================
+        // PURCHASE PANEL & SUPPLIER INWARD SUPPLY MANAGEMENT
+        // =========================================================================
+        function renderPurchasesView() {
+            renderPurchaseKpis();
+            renderPurchaseLowStockWidget();
+            populatePurchaseSupplierFilter();
+            renderPurchasesTable();
+        }
+
+        function renderPurchaseKpis() {
+            const todayStr = getTodayDateString();
+            const todayPurchases = purchases.filter(p => p.date === todayStr);
+
+            const todayVal = todayPurchases.reduce((sum, p) => sum + (p.grandTotal || p.subtotal || 0), 0);
+            const totalVal = purchases.reduce((sum, p) => sum + (p.grandTotal || p.subtotal || 0), 0);
+            
+            const creditPurchases = purchases.filter(p => (p.balanceDue || 0) > 0);
+            const totalDue = creditPurchases.reduce((sum, p) => sum + (p.balanceDue || 0), 0);
+
+            // Total units inwarded
+            let totalUnits = 0;
+            purchases.forEach(p => {
+                (p.items || []).forEach(it => {
+                    totalUnits += (Number(it.qty) || 0);
+                });
+            });
+
+            // Unique suppliers
+            const uniqueSuppliers = new Set(purchases.map(p => (p.supplierName || '').trim()).filter(Boolean));
+
+            const kpiToday = document.getElementById('kpiTodayPurchases');
+            const kpiTodayCount = document.getElementById('kpiTodayPurchasesCount');
+            const kpiTotal = document.getElementById('kpiTotalPurchases');
+            const kpiTotalCount = document.getElementById('kpiTotalPurchasesCount');
+            const kpiDue = document.getElementById('kpiSupplierPayablesDue');
+            const kpiDueCount = document.getElementById('kpiSupplierPayablesCount');
+            const kpiUnits = document.getElementById('kpiTotalUnitsInwarded');
+            const kpiSuppliers = document.getElementById('kpiActiveSuppliersCount');
+
+            if (kpiToday) kpiToday.innerText = formatINR(todayVal);
+            if (kpiTodayCount) kpiTodayCount.innerText = `${todayPurchases.length} bills`;
+            if (kpiTotal) kpiTotal.innerText = formatINR(totalVal);
+            if (kpiTotalCount) kpiTotalCount.innerText = `${purchases.length} bills`;
+            if (kpiDue) kpiDue.innerText = formatINR(totalDue);
+            if (kpiDueCount) kpiDueCount.innerText = `${creditPurchases.length} bills`;
+            if (kpiUnits) kpiUnits.innerText = `${totalUnits} units/bags`;
+            if (kpiSuppliers) kpiSuppliers.innerText = `${uniqueSuppliers.size} vendors`;
+        }
+
+        function renderPurchaseLowStockWidget() {
+            const container = document.getElementById('purchaseLowStockCardsGrid');
+            const countSpan = document.getElementById('purchaseLowStockCount');
+            if (!container) return;
+
+            container.innerHTML = '';
+            const lowItems = inventory.filter(i => i.stock <= i.minStock);
+            if (countSpan) countSpan.innerText = lowItems.length;
+
+            if (lowItems.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-4 text-center bg-white/80 rounded-2xl border border-emerald-200">
+                        <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600 mx-auto mb-1"></i>
+                        <p class="text-xs font-bold text-slate-800">All materials and cement bags are well-stocked above minimum buffer!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            lowItems.forEach(item => {
+                const card = document.createElement('div');
+                const isCritical = item.stock === 0 || item.stock <= Math.floor(item.minStock / 2);
+                card.className = "bg-white p-3 rounded-2xl border border-rose-200/90 shadow-2xs flex flex-col justify-between space-y-2 hover:shadow-xs transition";
+
+                card.innerHTML = `
+                    <div class="flex items-start gap-2">
+                        <img src="${item.image || PRESET_PRODUCT_IMAGES[0].url}" alt="" class="w-10 h-10 rounded-xl object-cover bg-slate-100 shrink-0 border border-slate-200">
+                        <div class="min-w-0 flex-1">
+                            <span class="text-[9px] font-bold text-amber-700 uppercase tracking-wider block">${item.brand}</span>
+                            <h5 class="text-xs font-bold text-slate-900 leading-tight line-clamp-1">${item.name}</h5>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="text-[10px] font-black ${isCritical ? 'text-rose-600' : 'text-amber-700'} mono">${item.stock} / ${item.minStock} ${item.unit}</span>
+                                <span class="text-[9px] px-1.5 py-0.2 rounded font-black ${isCritical ? 'bg-rose-600 text-white' : 'bg-amber-100 text-amber-900'}">${isCritical ? 'CRITICAL' : 'LOW'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px]">
+                        <span class="text-slate-500 font-semibold mono">Cost: ${formatINR(item.costPrice)}</span>
+                        <button onclick="openNewPurchaseModal('${item.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-[10px] flex items-center gap-1 shadow-2xs">
+                            <i data-lucide="plus" class="w-3 h-3"></i> + Inward
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function populatePurchaseSupplierFilter() {
+            const select = document.getElementById('purchaseSupplierFilter');
+            if (!select) return;
+            const currentVal = select.value;
+            const suppliers = Array.from(new Set(purchases.map(p => (p.supplierName || '').trim()).filter(Boolean)));
+
+            select.innerHTML = '<option value="All">All Suppliers / Depots</option>' + 
+                suppliers.map(s => `<option value="${s}" ${s === currentVal ? 'selected' : ''}>${s}</option>`).join('');
+        }
+
+        function renderPurchasesTable() {
+            const tbody = document.getElementById('purchasesTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const query = (document.getElementById('purchaseSearchInput')?.value || '').toLowerCase();
+            const supplierFilter = document.getElementById('purchaseSupplierFilter')?.value || 'All';
+            const statusFilter = document.getElementById('purchasePaymentStatusFilter')?.value || 'All';
+
+            const filtered = purchases.filter(p => {
+                const matchSupplier = (supplierFilter === 'All' || p.supplierName === supplierFilter);
+                const matchStatus = (statusFilter === 'All' || p.paymentStatus === statusFilter);
+                const itemsText = (p.items || []).map(i => i.name).join(' ').toLowerCase();
+                const matchQuery = (p.purchaseNo && p.purchaseNo.toLowerCase().includes(query)) ||
+                                   (p.supplierName && p.supplierName.toLowerCase().includes(query)) ||
+                                   (p.invoiceRef && p.invoiceRef.toLowerCase().includes(query)) ||
+                                   (p.vehicleNo && p.vehicleNo.toLowerCase().includes(query)) ||
+                                   itemsText.includes(query);
+                return matchSupplier && matchStatus && matchQuery;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400">No purchase invoices found matching filter.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition';
+
+                const isPaid = p.paymentStatus === 'Paid';
+                const isPartial = p.paymentStatus === 'Partial';
+                const statusBadge = isPaid
+                    ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Paid in Full</span>`
+                    : (isPartial 
+                        ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Partial (Due: ${formatINR(p.balanceDue)})</span>`
+                        : `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800">Credit (Due: ${formatINR(p.balanceDue)})</span>`);
+
+                const itemsSummary = (p.items || []).map(it => `<span class="inline-block bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded text-[10px] mr-1 mb-1 font-semibold">${it.name.split('(')[0].trim()}: <strong>${it.qty}</strong></span>`).join('');
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4">
+                        <span class="font-black text-slate-900 mono block">${p.purchaseNo}</span>
+                        <span class="text-[10px] text-slate-400">${p.date}</span>
+                    </td>
+                    <td class="py-3 px-3">
+                        <span class="font-bold text-slate-900 block">${p.supplierName}</span>
+                        <span class="text-[10px] text-slate-400 mono">${p.supplierPhone ? '+91 ' + p.supplierPhone : ''} ${p.invoiceRef ? '• Ref: ' + p.invoiceRef : ''}</span>
+                    </td>
+                    <td class="py-3 px-3">
+                        <span class="font-bold text-slate-700 mono bg-slate-100 px-2 py-0.5 rounded text-[11px]">${p.vehicleNo || 'Direct Depot'}</span>
+                    </td>
+                    <td class="py-3 px-3 max-w-xs">
+                        <div class="flex flex-wrap">${itemsSummary}</div>
+                    </td>
+                    <td class="py-3 px-3">
+                        <span class="font-black text-slate-900 mono block text-sm">${formatINR(p.grandTotal || p.subtotal)}</span>
+                        <span class="text-[10px] text-slate-400">${p.paymentMode}</span>
+                    </td>
+                    <td class="py-3 px-3">
+                        ${statusBadge}
+                    </td>
+                    <td class="py-3 px-4 text-right whitespace-nowrap">
+                        <button onclick="previewPurchaseReceipt('${p.purchaseNo}')" class="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg mr-1 transition" title="View / Print Goods Receipt Note (GRN)">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="deletePurchaseRecord('${p.purchaseNo}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Delete Purchase Record">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+        }
+
+        // =========================================================================
+        // PURCHASE ENTRY MODAL LOGIC
+        // =========================================================================
+        function openNewPurchaseModal(prefilledProductId = null) {
+            document.getElementById('purchModalSupplierName').value = 'UltraTech Cement Regional Depot (Shamshabad Hub)';
+            document.getElementById('purchModalSupplierPhone').value = '9440012345';
+            document.getElementById('purchModalInvoiceRef').value = 'INV-' + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('purchModalVehicleNo').value = 'TS 09 UB ' + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('purchModalDate').value = getTodayDateString();
+            document.getElementById('purchModalPaymentStatus').value = 'Paid';
+            document.getElementById('purchModalPaymentMode').value = 'Bank Transfer / RTGS';
+            document.getElementById('purchModalNotes').value = '';
+            document.getElementById('purchModalApplyGst').checked = false;
+
+            currentPurchaseLines = [];
+            if (prefilledProductId) {
+                const prod = inventory.find(p => p.id === prefilledProductId);
+                if (prod) {
+                    currentPurchaseLines.push({
+                        lineId: 'purch_line_' + Date.now(),
+                        productId: prod.id,
+                        qty: Math.max(100, prod.minStock * 2),
+                        rate: prod.costPrice,
+                        total: (Math.max(100, prod.minStock * 2)) * prod.costPrice
+                    });
+                }
+            } else {
+                addPurchaseModalLineItem();
+            }
+
+            renderPurchaseModalLines();
+            recalculatePurchaseModalTotals();
+            document.getElementById('newPurchaseModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeNewPurchaseModal() {
+            document.getElementById('newPurchaseModal').classList.add('hidden');
+        }
+
+        function setPurchaseSupplierQuick(name, phone) {
+            document.getElementById('purchModalSupplierName').value = name;
+            document.getElementById('purchModalSupplierPhone').value = phone;
+        }
+
+        function addPurchaseModalLineItem(productId = null, qty = 100, rate = null) {
+            const firstProd = inventory.find(p => p.id === productId) || inventory[0];
+            const lineId = 'purch_line_' + Date.now() + Math.random().toString(36).substr(2, 4);
+            const lineRate = rate !== null ? rate : (firstProd ? firstProd.costPrice : 0);
+            currentPurchaseLines.push({
+                lineId,
+                productId: firstProd ? firstProd.id : '',
+                qty: qty,
+                rate: lineRate,
+                total: qty * lineRate
+            });
+            renderPurchaseModalLines();
+            recalculatePurchaseModalTotals();
+        }
+
+        function removePurchaseModalLineItem(lineId) {
+            currentPurchaseLines = currentPurchaseLines.filter(l => l.lineId !== lineId);
+            if (currentPurchaseLines.length === 0) {
+                addPurchaseModalLineItem();
+            } else {
+                renderPurchaseModalLines();
+                recalculatePurchaseModalTotals();
+            }
+        }
+
+        function handlePurchaseItemChange(lineId) {
+            const sel = document.getElementById('purch_prod_' + lineId);
+            const line = currentPurchaseLines.find(l => l.lineId === lineId);
+            if (sel && line) {
+                line.productId = sel.value;
+                const prod = inventory.find(p => p.id === sel.value);
+                if (prod) {
+                    line.rate = prod.costPrice;
+                    const qtyInput = document.getElementById('purch_qty_' + lineId);
+                    const rateInput = document.getElementById('purch_rate_' + lineId);
+                    if (rateInput) rateInput.value = prod.costPrice;
+                    line.qty = Number(qtyInput?.value) || 100;
+                    line.total = line.qty * line.rate;
+                }
+                recalculatePurchaseModalTotals();
+            }
+        }
+
+        function handlePurchaseLineQtyOrRateChange(lineId) {
+            const line = currentPurchaseLines.find(l => l.lineId === lineId);
+            if (!line) return;
+            const qtyInput = document.getElementById('purch_qty_' + lineId);
+            const rateInput = document.getElementById('purch_rate_' + lineId);
+            line.qty = Number(qtyInput?.value) || 0;
+            line.rate = Number(rateInput?.value) || 0;
+            line.total = line.qty * line.rate;
+            const totalSpan = document.getElementById('purch_total_' + lineId);
+            if (totalSpan) totalSpan.innerText = formatINR(line.total);
+            recalculatePurchaseModalTotals();
+        }
+
+        function renderPurchaseModalLines() {
+            const tbody = document.getElementById('purchModalItemsBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            currentPurchaseLines.forEach(line => {
+                const tr = document.createElement('tr');
+                const optionsHtml = inventory.map(p => `
+                    <option value="${p.id}" ${p.id === line.productId ? 'selected' : ''}>${p.name} [Stock: ${p.stock} ${p.unit}]</option>
+                `).join('');
+
+                tr.innerHTML = `
+                    <td class="py-2 px-3">
+                        <select id="purch_prod_${line.lineId}" onchange="handlePurchaseItemChange('${line.lineId}')" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900 focus:ring-2 focus:ring-teal-500">
+                            ${optionsHtml}
+                        </select>
+                    </td>
+                    <td class="py-2 px-2">
+                        <input type="number" id="purch_qty_${line.lineId}" min="1" value="${line.qty}" oninput="handlePurchaseLineQtyOrRateChange('${line.lineId}')" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-xl font-black mono text-center text-emerald-700 focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="py-2 px-2">
+                        <input type="number" id="purch_rate_${line.lineId}" min="0" step="1" value="${line.rate}" oninput="handlePurchaseLineQtyOrRateChange('${line.lineId}')" class="w-full px-2 py-1.5 bg-slate-50 border border-slate-300 rounded-xl font-bold mono text-right text-slate-900 focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="py-2 px-3 text-right">
+                        <span id="purch_total_${line.lineId}" class="font-black mono text-slate-900 text-xs">${formatINR(line.total)}</span>
+                    </td>
+                    <td class="py-2 px-2 text-center">
+                        <button type="button" onclick="removePurchaseModalLineItem('${line.lineId}')" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function handlePurchasePaymentStatusChange() {
+            const status = document.getElementById('purchModalPaymentStatus').value;
+            const paidRow = document.getElementById('purchModalPaidRow');
+            recalculatePurchaseModalTotals();
+        }
+
+        function recalculatePurchaseModalTotals() {
+            let subtotal = 0;
+            currentPurchaseLines.forEach(l => {
+                subtotal += (l.qty * l.rate);
+            });
+
+            const applyGst = document.getElementById('purchModalApplyGst')?.checked || false;
+            const gstAmount = applyGst ? Math.round(subtotal * 0.18) : 0;
+            const grandTotal = subtotal + gstAmount;
+
+            const status = document.getElementById('purchModalPaymentStatus')?.value || 'Paid';
+            const paidInput = document.getElementById('purchModalPaidAmount');
+            const balanceInput = document.getElementById('purchModalBalanceDue');
+
+            let paid = 0;
+            let due = 0;
+
+            if (status === 'Paid') {
+                paid = grandTotal;
+                due = 0;
+                if (paidInput) paidInput.value = grandTotal;
+            } else if (status === 'Credit') {
+                paid = 0;
+                due = grandTotal;
+                if (paidInput) paidInput.value = 0;
+            } else {
+                paid = Number(paidInput?.value) || 0;
+                due = Math.max(0, grandTotal - paid);
+            }
+
+            if (balanceInput) balanceInput.value = due;
+            const subSpan = document.getElementById('purchModalSubtotal');
+            const gstSpan = document.getElementById('purchModalGstAmount');
+            const grandSpan = document.getElementById('purchModalGrandTotal');
+
+            if (subSpan) subSpan.innerText = formatINR(subtotal);
+            if (gstSpan) gstSpan.innerText = formatINR(gstAmount);
+            if (grandSpan) grandSpan.innerText = formatINR(grandTotal);
+        }
+
+        function handleSavePurchase(e) {
+            e.preventDefault();
+            if (currentPurchaseLines.length === 0) {
+                showToast("Please add at least one material line!", "error");
+                return;
+            }
+
+            const supplierName = document.getElementById('purchModalSupplierName').value.trim();
+            const supplierPhone = document.getElementById('purchModalSupplierPhone').value.trim();
+            const invoiceRef = document.getElementById('purchModalInvoiceRef').value.trim();
+            const vehicleNo = document.getElementById('purchModalVehicleNo').value.trim();
+            const purchaseDate = document.getElementById('purchModalDate').value;
+            const paymentStatus = document.getElementById('purchModalPaymentStatus').value;
+            const paymentMode = document.getElementById('purchModalPaymentMode').value;
+            const notes = document.getElementById('purchModalNotes').value.trim();
+            const applyGst = document.getElementById('purchModalApplyGst').checked;
+
+            let subtotal = 0;
+            const items = [];
+
+            // Update inventory stock counts & cost prices
+            currentPurchaseLines.forEach(line => {
+                const prod = inventory.find(p => p.id === line.productId);
+                if (prod && line.qty > 0) {
+                    prod.stock += line.qty;
+                    if (line.rate > 0) prod.costPrice = line.rate;
+                    items.push({
+                        productId: prod.id,
+                        name: prod.name,
+                        qty: line.qty,
+                        rate: line.rate,
+                        total: line.qty * line.rate
+                    });
+                    subtotal += (line.qty * line.rate);
+                }
+            });
+
+            const gstAmount = applyGst ? Math.round(subtotal * 0.18) : 0;
+            const grandTotal = subtotal + gstAmount;
+            let paidAmount = Number(document.getElementById('purchModalPaidAmount').value) || 0;
+            if (paymentStatus === 'Paid') paidAmount = grandTotal;
+            if (paymentStatus === 'Credit') paidAmount = 0;
+            const balanceDue = Math.max(0, grandTotal - paidAmount);
+
+            // Generate Purchase Number
+            const nextIdx = purchases.length + 1;
+            const purchaseNo = `PUR-2026-${String(nextIdx).padStart(3, '0')}`;
+
+            const newRecord = {
+                purchaseNo,
+                date: purchaseDate,
+                supplierName,
+                supplierPhone,
+                invoiceRef,
+                vehicleNo,
+                paymentStatus,
+                paymentMode,
+                items,
+                subtotal,
+                applyGst,
+                gstRate: applyGst ? 18 : 0,
+                gstAmount,
+                grandTotal,
+                paidAmount,
+                balanceDue,
+                notes
+            };
+
+            purchases.unshift(newRecord);
+            savePurchases();
+            saveInventory();
+            closeNewPurchaseModal();
+            updateLowStockUI();
+            renderPurchasesView();
+            renderInventoryTable();
+            renderPosCatalog();
+            renderDashboard();
+
+            showToast(`Inward Purchase #${purchaseNo} saved! Godown stock updated.`);
+        }
+
+        function autoDraftLowStockPurchase() {
+            const lowItems = inventory.filter(i => i.stock <= i.minStock);
+            if (lowItems.length === 0) {
+                showToast("All products have adequate stock above minimum threshold!");
+                return;
+            }
+
+            openNewPurchaseModal();
+            currentPurchaseLines = [];
+            lowItems.forEach(item => {
+                const suggestedQty = Math.max(100, (item.minStock * 2) - item.stock);
+                currentPurchaseLines.push({
+                    lineId: 'purch_line_' + Date.now() + Math.random().toString(36).substr(2, 4),
+                    productId: item.id,
+                    qty: suggestedQty,
+                    rate: item.costPrice,
+                    total: suggestedQty * item.costPrice
+                });
+            });
+
+            renderPurchaseModalLines();
+            recalculatePurchaseModalTotals();
+            showToast(`Auto-drafted purchase order for ${lowItems.length} low stock items!`);
+        }
+
+        function previewPurchaseReceipt(purchaseNo) {
+            const rec = purchases.find(p => p.purchaseNo === purchaseNo);
+            if (!rec) return;
+
+            document.getElementById('grnPrintNo').innerText = rec.purchaseNo;
+            document.getElementById('grnPrintDate').innerText = rec.date;
+            document.getElementById('grnPrintSupplierName').innerText = rec.supplierName;
+            document.getElementById('grnPrintSupplierPhone').innerText = rec.supplierPhone ? '+91 ' + rec.supplierPhone : '';
+            document.getElementById('grnPrintInvoiceRef').innerText = rec.invoiceRef ? 'Inv / DC: ' + rec.invoiceRef : '';
+            document.getElementById('grnPrintVehicleNo').innerText = 'Vehicle: ' + (rec.vehicleNo || 'Depot Delivery');
+            document.getElementById('grnPrintPaymentStatus').innerText = `Payment: ${rec.paymentStatus} (${rec.paymentMode})`;
+            document.getElementById('grnPrintNotes').innerText = rec.notes ? 'Logistics Note: ' + rec.notes : '';
+
+            const tbody = document.getElementById('grnPrintItemsBody');
+            tbody.innerHTML = '';
+
+            (rec.items || []).forEach((it, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-2">${idx + 1}</td>
+                    <td class="py-2 font-bold">${it.name}</td>
+                    <td class="py-2 text-center mono font-bold">${it.qty}</td>
+                    <td class="py-2 text-right mono">${formatINR(it.rate)}</td>
+                    <td class="py-2 text-right font-bold mono">${formatINR(it.total)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('grnPrintSubtotal').innerText = formatINR(rec.subtotal);
+            if (rec.applyGst) {
+                document.getElementById('grnPrintGstRow').classList.remove('hidden');
+                document.getElementById('grnPrintGst').innerText = formatINR(rec.gstAmount);
+            } else {
+                document.getElementById('grnPrintGstRow').classList.add('hidden');
+            }
+            document.getElementById('grnPrintGrandTotal').innerText = formatINR(rec.grandTotal || rec.subtotal);
+            document.getElementById('grnPrintPaid').innerText = formatINR(rec.paidAmount);
+
+            if (rec.balanceDue > 0) {
+                document.getElementById('grnPrintDueRow').classList.remove('hidden');
+                document.getElementById('grnPrintDue').innerText = formatINR(rec.balanceDue);
+            } else {
+                document.getElementById('grnPrintDueRow').classList.add('hidden');
+            }
+
+            document.getElementById('purchaseReceiptModal').classList.remove('hidden');
+        }
+
+        function closePurchaseReceiptModal() {
+            document.getElementById('purchaseReceiptModal').classList.add('hidden');
+        }
+
+        function deletePurchaseRecord(purchaseNo) {
+            if (confirm(`Void purchase invoice ${purchaseNo}? (Note: Stock counts will remain unchanged)`)) {
+                purchases = purchases.filter(p => p.purchaseNo !== purchaseNo);
+                savePurchases();
+                renderPurchasesView();
+                showToast(`Purchase record ${purchaseNo} removed.`);
+            }
+        }
+
+        function exportPurchasesCSV() {
+            if (purchases.length === 0) {
+                showToast("No purchase records to export.", "error");
+                return;
+            }
+
+            let csv = "Purchase No,Date,Supplier,Phone,Invoice Ref,Vehicle,Items,Total Amount,Payment Mode,Status,Balance Due\n";
+            purchases.forEach(p => {
+                const itemsStr = (p.items || []).map(i => `${i.name} (Qty:${i.qty})`).join('; ').replace(/"/g, '""');
+                csv += `"${p.purchaseNo}","${p.date}","${p.supplierName.replace(/"/g, '""')}","${p.supplierPhone || ''}","${p.invoiceRef || ''}","${p.vehicleNo || ''}","${itemsStr}","${p.grandTotal || p.subtotal}","${p.paymentMode}","${p.paymentStatus}","${p.balanceDue || 0}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `KARNI_BUILTMART_Purchases_${getTodayDateString()}.csv`;
+            link.click();
+            showToast("Purchase ledger exported to CSV!");
         }
 
         // =========================================================================
@@ -3008,6 +4213,7 @@
                 company: "KARNI BUILTMART (Hyderabad)",
                 timestamp: new Date().toISOString(),
                 inventory: inventory,
+                purchases: purchases,
                 sales: sales,
                 khataPayments: khataPayments
             };
@@ -3020,13 +4226,16 @@
         }
 
         function resetToDemoData() {
-            if (confirm("Reset to default KARNI BUILTMART catalog & demo data?")) {
+            if (confirm("Reset to default KARNI BUILTMART catalog, purchases & demo data?")) {
                 inventory = [...INITIAL_INVENTORY];
+                purchases = [...INITIAL_PURCHASES];
                 sales = [...INITIAL_SALES];
                 khataPayments = [];
                 saveInventory();
+                savePurchases();
                 saveSales();
                 saveKhataPayments();
+                updateLowStockUI();
                 renderDashboard();
                 showToast("Reset to Karni Builtmart demo data complete!");
             }
